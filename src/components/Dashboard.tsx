@@ -180,17 +180,30 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
 
       {/* Grid */}
       <div className="container py-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-          {destinations.map((dest) => (
-            <DestinationCard
-              key={dest.id}
-              destination={dest}
-              days={days}
-              addLuggage={addLuggage}
-              showPremium={showPremium}
-            />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="border border-border rounded-sm p-3 space-y-3">
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-20 w-full" />
+                <Skeleton className="h-16 w-full" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+            {destinations.map((dest) => (
+              <DestinationCard
+                key={dest.id}
+                destination={dest}
+                days={days}
+                addLuggage={addLuggage}
+                showPremium={showPremium}
+              />
+            ))}
+          </div>
+        )}
 
         <div className="text-center text-[9px] text-muted-foreground mt-6 pb-4">
           ALL DATA IS MOCKED · PRICES FOR ILLUSTRATION ONLY · THE 96-HOUR PIVOT v0.2
