@@ -1,8 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
-import { TravelMode, getDestinations, WinterConditions, SummerConditions, calculateDIYTotal } from '@/data/destinations';
+import { TravelMode, WinterConditions, SummerConditions, calculateDIYTotal } from '@/data/destinations';
 import DestinationCard from './DestinationCard';
-import { ArrowLeft, Luggage, Clock, Crown, ArrowUpDown } from 'lucide-react';
+import { ArrowLeft, Luggage, Clock, Crown, ArrowUpDown, Wifi, WifiOff } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { useDestinations } from '@/hooks/useDestinations';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type WinterSort = 'freshSnow' | 'diyTotal' | 'vibeScore' | 'altitude';
 type SummerSort = 'swellHeight' | 'diyTotal' | 'vibeScore' | 'waterTemp';
