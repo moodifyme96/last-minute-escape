@@ -19,10 +19,10 @@ export const winterDestinations: Destination[] = [
       ],
       lastUpdated: new Date().toISOString(),
     },
-    costs: { accommodationPerNight: 95, activityCostPerDay: 62, clubMedPerNight: 285, clubMedActivityIncluded: true },
+    costs: { accommodationPerNight: 95, activityCostPerDay: 72, clubMedPerNight: 285, clubMedActivityIncluded: true },
   },
   {
-    id: 'w2', name: 'Innsbruck', country: 'AT', region: 'Alps', mode: 'winter',
+    id: 'w2', name: 'Innsbruck (Nordkette)', country: 'AT', region: 'Alps', mode: 'winter',
     flights: {
       origin: 'TLV', hub: 'INN',
       outbound: { airline: 'Austrian', departure: '07:00', arrival: '10:15', baseFare: 245, baggageIncluded: true },
@@ -39,7 +39,7 @@ export const winterDestinations: Destination[] = [
       ],
       lastUpdated: new Date().toISOString(),
     },
-    costs: { accommodationPerNight: 80, activityCostPerDay: 58, clubMedPerNight: 260, clubMedActivityIncluded: true },
+    costs: { accommodationPerNight: 85, activityCostPerDay: 56, clubMedPerNight: 260, clubMedActivityIncluded: true },
   },
   {
     id: 'w3', name: 'Chamonix', country: 'FR', region: 'Alps', mode: 'winter',
@@ -59,7 +59,7 @@ export const winterDestinations: Destination[] = [
       ],
       lastUpdated: new Date().toISOString(),
     },
-    costs: { accommodationPerNight: 110, activityCostPerDay: 65, clubMedPerNight: 310, clubMedActivityIncluded: true },
+    costs: { accommodationPerNight: 115, activityCostPerDay: 68, clubMedPerNight: 310, clubMedActivityIncluded: true },
   },
   {
     id: 'w4', name: 'Zermatt', country: 'CH', region: 'Alps', mode: 'winter',
@@ -79,7 +79,7 @@ export const winterDestinations: Destination[] = [
       ],
       lastUpdated: new Date().toISOString(),
     },
-    costs: { accommodationPerNight: 165, activityCostPerDay: 75, clubMedPerNight: 380, clubMedActivityIncluded: true },
+    costs: { accommodationPerNight: 170, activityCostPerDay: 85, clubMedPerNight: 380, clubMedActivityIncluded: true },
   },
   {
     id: 'w5', name: 'St. Anton', country: 'AT', region: 'Alps', mode: 'winter',
@@ -99,7 +99,7 @@ export const winterDestinations: Destination[] = [
       ],
       lastUpdated: new Date().toISOString(),
     },
-    costs: { accommodationPerNight: 90, activityCostPerDay: 58, clubMedPerNight: 270, clubMedActivityIncluded: true },
+    costs: { accommodationPerNight: 95, activityCostPerDay: 62, clubMedPerNight: 270, clubMedActivityIncluded: true },
   },
   {
     id: 'w6', name: 'Bansko', country: 'BG', region: 'Balkans', mode: 'winter',
@@ -119,7 +119,7 @@ export const winterDestinations: Destination[] = [
       ],
       lastUpdated: new Date().toISOString(),
     },
-    costs: { accommodationPerNight: 35, activityCostPerDay: 30, clubMedPerNight: 155, clubMedActivityIncluded: true },
+    costs: { accommodationPerNight: 35, activityCostPerDay: 35, clubMedPerNight: 155, clubMedActivityIncluded: true },
   },
   {
     id: 'w7', name: 'Livigno', country: 'IT', region: 'Alps', mode: 'winter',
@@ -139,7 +139,7 @@ export const winterDestinations: Destination[] = [
       ],
       lastUpdated: new Date().toISOString(),
     },
-    costs: { accommodationPerNight: 70, activityCostPerDay: 45, clubMedPerNight: 220, clubMedActivityIncluded: true },
+    costs: { accommodationPerNight: 75, activityCostPerDay: 48, clubMedPerNight: 220, clubMedActivityIncluded: true },
   },
   {
     id: 'w8', name: 'Gudauri', country: 'GE', region: 'Caucasus', mode: 'winter',
@@ -159,7 +159,7 @@ export const winterDestinations: Destination[] = [
       ],
       lastUpdated: new Date().toISOString(),
     },
-    costs: { accommodationPerNight: 40, activityCostPerDay: 18, clubMedPerNight: 0, clubMedActivityIncluded: false },
+    costs: { accommodationPerNight: 40, activityCostPerDay: 20, clubMedPerNight: 0, clubMedActivityIncluded: false },
   },
   {
     id: 'w9', name: 'Verbier', country: 'CH', region: 'Alps', mode: 'winter',
@@ -179,10 +179,10 @@ export const winterDestinations: Destination[] = [
       ],
       lastUpdated: new Date().toISOString(),
     },
-    costs: { accommodationPerNight: 180, activityCostPerDay: 72, clubMedPerNight: 395, clubMedActivityIncluded: true },
+    costs: { accommodationPerNight: 185, activityCostPerDay: 78, clubMedPerNight: 395, clubMedActivityIncluded: true },
   },
   {
-    id: 'w10', name: 'Soldeu', country: 'AD', region: 'Pyrenees', mode: 'winter',
+    id: 'w10', name: 'Grandvalira (Soldeu)', country: 'AD', region: 'Pyrenees', mode: 'winter',
     flights: {
       origin: 'TLV', hub: 'TLS',
       outbound: { airline: 'Transavia', departure: '06:30', arrival: '10:45', baseFare: 145, baggageIncluded: false },
@@ -199,7 +199,7 @@ export const winterDestinations: Destination[] = [
       ],
       lastUpdated: new Date().toISOString(),
     },
-    costs: { accommodationPerNight: 65, activityCostPerDay: 48, clubMedPerNight: 235, clubMedActivityIncluded: true },
+    costs: { accommodationPerNight: 70, activityCostPerDay: 52, clubMedPerNight: 235, clubMedActivityIncluded: true },
   },
   {
     id: 'w11', name: 'Tignes', country: 'FR', region: 'Alps', mode: 'winter',
@@ -219,7 +219,7 @@ export const winterDestinations: Destination[] = [
       ],
       lastUpdated: new Date().toISOString(),
     },
-    costs: { accommodationPerNight: 88, activityCostPerDay: 62, clubMedPerNight: 290, clubMedActivityIncluded: true },
+    costs: { accommodationPerNight: 90, activityCostPerDay: 68, clubMedPerNight: 290, clubMedActivityIncluded: true },
   },
   {
     id: 'w12', name: 'Kitzbühel', country: 'AT', region: 'Alps', mode: 'winter',
@@ -239,7 +239,7 @@ export const winterDestinations: Destination[] = [
       ],
       lastUpdated: new Date().toISOString(),
     },
-    costs: { accommodationPerNight: 105, activityCostPerDay: 56, clubMedPerNight: 275, clubMedActivityIncluded: true },
+    costs: { accommodationPerNight: 110, activityCostPerDay: 60, clubMedPerNight: 275, clubMedActivityIncluded: true },
   },
   {
     id: 'w13', name: 'Borovets', country: 'BG', region: 'Balkans', mode: 'winter',
@@ -259,7 +259,7 @@ export const winterDestinations: Destination[] = [
       ],
       lastUpdated: new Date().toISOString(),
     },
-    costs: { accommodationPerNight: 30, activityCostPerDay: 25, clubMedPerNight: 140, clubMedActivityIncluded: true },
+    costs: { accommodationPerNight: 30, activityCostPerDay: 28, clubMedPerNight: 140, clubMedActivityIncluded: true },
   },
   {
     id: 'w14', name: 'Cervinia', country: 'IT', region: 'Alps', mode: 'winter',
@@ -279,7 +279,7 @@ export const winterDestinations: Destination[] = [
       ],
       lastUpdated: new Date().toISOString(),
     },
-    costs: { accommodationPerNight: 85, activityCostPerDay: 55, clubMedPerNight: 265, clubMedActivityIncluded: true },
+    costs: { accommodationPerNight: 90, activityCostPerDay: 62, clubMedPerNight: 265, clubMedActivityIncluded: true },
   },
   {
     id: 'w15', name: 'Jasná', country: 'SK', region: 'Carpathians', mode: 'winter',
@@ -299,6 +299,6 @@ export const winterDestinations: Destination[] = [
       ],
       lastUpdated: new Date().toISOString(),
     },
-    costs: { accommodationPerNight: 45, activityCostPerDay: 35, clubMedPerNight: 175, clubMedActivityIncluded: true },
+    costs: { accommodationPerNight: 45, activityCostPerDay: 38, clubMedPerNight: 175, clubMedActivityIncluded: true },
   },
 ];

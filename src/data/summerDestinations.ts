@@ -99,7 +99,7 @@ export const summerDestinations: Destination[] = [
       ],
       lastUpdated: new Date().toISOString(),
     },
-    costs: { accommodationPerNight: 95, activityCostPerDay: 40, clubMedPerNight: 275, clubMedActivityIncluded: true, carRentalPerDay: 35 },
+    costs: { accommodationPerNight: 100, activityCostPerDay: 40, clubMedPerNight: 275, clubMedActivityIncluded: true, carRentalPerDay: 35 },
   },
   {
     id: 's6', name: 'Ericeira', country: 'PT', region: 'Atlantic Coast', mode: 'summer',
@@ -139,7 +139,7 @@ export const summerDestinations: Destination[] = [
       ],
       lastUpdated: new Date().toISOString(),
     },
-    costs: { accommodationPerNight: 50, activityCostPerDay: 30, clubMedPerNight: 190, clubMedActivityIncluded: true, carRentalPerDay: 20 },
+    costs: { accommodationPerNight: 55, activityCostPerDay: 30, clubMedPerNight: 190, clubMedActivityIncluded: true, carRentalPerDay: 20 },
   },
   {
     id: 's8', name: 'Zanzibar', country: 'TZ', region: 'Indian Ocean', mode: 'summer',
@@ -179,7 +179,7 @@ export const summerDestinations: Destination[] = [
       ],
       lastUpdated: new Date().toISOString(),
     },
-    costs: { accommodationPerNight: 80, activityCostPerDay: 35, clubMedPerNight: 260, clubMedActivityIncluded: true, carRentalPerDay: 30 },
+    costs: { accommodationPerNight: 85, activityCostPerDay: 35, clubMedPerNight: 260, clubMedActivityIncluded: true, carRentalPerDay: 30 },
   },
   {
     id: 's10', name: 'Sagres', country: 'PT', region: 'Atlantic Coast', mode: 'summer',
@@ -199,7 +199,7 @@ export const summerDestinations: Destination[] = [
       ],
       lastUpdated: new Date().toISOString(),
     },
-    costs: { accommodationPerNight: 50, activityCostPerDay: 28, clubMedPerNight: 185, clubMedActivityIncluded: true, carRentalPerDay: 22 },
+    costs: { accommodationPerNight: 55, activityCostPerDay: 28, clubMedPerNight: 185, clubMedActivityIncluded: true, carRentalPerDay: 22 },
   },
   {
     id: 's11', name: 'Taghazout', country: 'MA', region: 'Atlantic Coast', mode: 'summer',
@@ -239,7 +239,7 @@ export const summerDestinations: Destination[] = [
       ],
       lastUpdated: new Date().toISOString(),
     },
-    costs: { accommodationPerNight: 60, activityCostPerDay: 25, clubMedPerNight: 230, clubMedActivityIncluded: true, carRentalPerDay: 25 },
+    costs: { accommodationPerNight: 65, activityCostPerDay: 25, clubMedPerNight: 230, clubMedActivityIncluded: true, carRentalPerDay: 25 },
   },
   {
     id: 's13', name: 'Sardinia', country: 'IT', region: 'Mediterranean', mode: 'summer',
@@ -259,7 +259,7 @@ export const summerDestinations: Destination[] = [
       ],
       lastUpdated: new Date().toISOString(),
     },
-    costs: { accommodationPerNight: 75, activityCostPerDay: 35, clubMedPerNight: 245, clubMedActivityIncluded: true, carRentalPerDay: 28 },
+    costs: { accommodationPerNight: 80, activityCostPerDay: 35, clubMedPerNight: 245, clubMedActivityIncluded: true, carRentalPerDay: 28 },
   },
   {
     id: 's14', name: 'Lanzarote', country: 'ES', region: 'Canary Islands', mode: 'summer',
@@ -279,7 +279,7 @@ export const summerDestinations: Destination[] = [
       ],
       lastUpdated: new Date().toISOString(),
     },
-    costs: { accommodationPerNight: 55, activityCostPerDay: 30, clubMedPerNight: 200, clubMedActivityIncluded: true, carRentalPerDay: 20 },
+    costs: { accommodationPerNight: 60, activityCostPerDay: 30, clubMedPerNight: 200, clubMedActivityIncluded: true, carRentalPerDay: 20 },
   },
   {
     id: 's15', name: 'Split', country: 'HR', region: 'Mediterranean', mode: 'summer',
@@ -299,6 +299,6 @@ export const summerDestinations: Destination[] = [
       ],
       lastUpdated: new Date().toISOString(),
     },
-    costs: { accommodationPerNight: 55, activityCostPerDay: 30, clubMedPerNight: 210, clubMedActivityIncluded: true, carRentalPerDay: 25 },
+    costs: { accommodationPerNight: 60, activityCostPerDay: 30, clubMedPerNight: 210, clubMedActivityIncluded: true, carRentalPerDay: 25 },
   },
 ];
