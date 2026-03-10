@@ -1,5 +1,5 @@
 import { Destination, WinterConditions, SummerConditions, calculateDIYTotal, calculateClubMedTotal } from '@/data/destinations';
-import { DollarSign, Crown } from 'lucide-react';
+import { DollarSign, Crown, Wifi, WifiOff } from 'lucide-react';
 import WinterEnvDisplay from './card/WinterEnvDisplay';
 import SummerEnvDisplay from './card/SummerEnvDisplay';
 import SentimentBox from './card/SentimentBox';
@@ -7,7 +7,7 @@ import FlightZone from './card/FlightZone';
 import CostBreakdown from './card/CostBreakdown';
 
 interface DestinationCardProps {
-  destination: Destination;
+  destination: Destination & { _liveFlights?: boolean; _liveWeather?: boolean; _liveSentiment?: boolean };
   days: number;
   addLuggage: boolean;
   showPremium: boolean;
@@ -18,6 +18,10 @@ const DestinationCard = ({ destination: dest, days, addLuggage, showPremium }: D
   const diyTotal = calculateDIYTotal(dest, days, addLuggage);
   const clubTotal = calculateClubMedTotal(dest, days, addLuggage);
   const f = dest.flights;
+  const hasLiveData = dest._liveFlights || dest._liveWeather || dest._liveSentiment;
+
+  // Check if flight data is missing (fallback)
+  const flightsMissing = f.outbound.airline === '—';
 
   return (
     <div className={`border rounded-sm p-0 overflow-hidden ${isWinter ? 'border-winter bg-winter glow-winter' : 'border-summer bg-summer glow-summer'}`}>
@@ -32,13 +36,23 @@ const DestinationCard = ({ destination: dest, days, addLuggage, showPremium }: D
         </div>
         <div className="flex items-center gap-2">
           <span className="text-[9px] text-muted-foreground">{dest.region}</span>
-          <span className="text-[10px] text-muted-foreground font-mono">TLV→{f.hub}</span>
+          {/* Per-card live indicator */}
+          {hasLiveData !== undefined && (
+            <span className={`text-[8px] ${hasLiveData ? 'text-terminal-green' : 'text-muted-foreground'}`}>
+              {hasLiveData ? '●' : '○'}
+            </span>
+          )}
         </div>
       </div>
 
       {/* Zone 1: Environmental + Sentiment */}
       <div className="px-3 py-2 border-b border-border">
-        <div className="text-[10px] text-muted-foreground mb-1.5 uppercase tracking-widest">▸ CONDITIONS</div>
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-[10px] text-muted-foreground uppercase tracking-widest">▸ CONDITIONS</span>
+          {dest._liveWeather === false && (
+            <span className="text-[8px] text-terminal-amber">CACHED</span>
+          )}
+        </div>
         {isWinter ? (
           <WinterEnvDisplay conditions={dest.conditions as WinterConditions} />
         ) : (
@@ -48,7 +62,18 @@ const DestinationCard = ({ destination: dest, days, addLuggage, showPremium }: D
       </div>
 
       {/* Zone 2: Flights */}
-      <FlightZone flights={f} addLuggage={addLuggage} />
+      {flightsMissing ? (
+        <div className="px-3 py-2 border-b border-border">
+          <div className="text-[10px] text-muted-foreground mb-1.5 uppercase tracking-widest">▸ FLIGHTS (TLV)</div>
+          <div className="flex items-center gap-2 p-2 bg-muted/30 rounded-sm border border-border">
+            <WifiOff className="w-3 h-3 text-terminal-amber" />
+            <span className="text-[10px] text-muted-foreground">Flight data unavailable — API limit reached or no routes found</span>
+          </div>
+          <div className="mt-1.5 text-[9px] text-muted-foreground">Hub: TLV→{f.hub}</div>
+        </div>
+      ) : (
+        <FlightZone flights={f} addLuggage={addLuggage} />
+      )}
 
       {/* Zone 3: Totals */}
       <div className="px-3 py-2">
@@ -56,8 +81,12 @@ const DestinationCard = ({ destination: dest, days, addLuggage, showPremium }: D
           ▸ {days}D COST AGGREGATOR
         </div>
 
-        {showPremium ? (
-          // Premium-only view
+        {flightsMissing ? (
+          <div className="flex items-center justify-between p-1.5 rounded-sm bg-muted/30 border border-border">
+            <span className="text-[10px] text-muted-foreground">COST ESTIMATE</span>
+            <span className="text-[10px] text-terminal-amber">AWAITING FLIGHT DATA</span>
+          </div>
+        ) : showPremium ? (
           clubTotal > 0 ? (
             <div className={`flex items-center justify-between p-2 rounded-sm border ${isWinter ? 'border-terminal-cyan bg-terminal-cyan/5' : 'border-terminal-amber bg-terminal-amber/5'}`}>
               <span className="text-[11px] font-semibold text-foreground flex items-center gap-1.5">
@@ -76,7 +105,6 @@ const DestinationCard = ({ destination: dest, days, addLuggage, showPremium }: D
             </div>
           )
         ) : (
-          // DIY view (default)
           <>
             <CostBreakdown dest={dest} days={days} addLuggage={addLuggage} isWinter={isWinter} />
 

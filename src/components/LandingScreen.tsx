@@ -1,5 +1,6 @@
 import { TravelMode } from '@/data/destinations';
-import { Snowflake, Sun, Luggage, Clock } from 'lucide-react';
+import { Snowflake, Sun, Luggage, Clock, Zap } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface LandingScreenProps {
   onSelectMode: (mode: TravelMode) => void;
@@ -10,7 +11,6 @@ interface LandingScreenProps {
 }
 
 const LandingScreen = ({ onSelectMode, days, onDaysChange, addLuggage, onToggleLuggage }: LandingScreenProps) => {
-  // Generate departure window text
   const now = new Date();
   const deadline = new Date(now.getTime() + 96 * 60 * 60 * 1000);
   const formatDate = (d: Date) => d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
@@ -18,49 +18,84 @@ const LandingScreen = ({ onSelectMode, days, onDaysChange, addLuggage, onToggleL
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 scanline">
       {/* Title Block */}
-      <div className="text-center mb-10">
+      <motion.div
+        className="text-center mb-10"
+        initial={{ opacity: 0, y: -30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: 'easeOut' }}
+      >
         <div className="text-[10px] text-muted-foreground tracking-[0.5em] uppercase mb-2">
           ── SYSTEM ONLINE ──
         </div>
         <h1 className="text-4xl md:text-6xl font-bold font-display text-foreground tracking-tight">
-          LAST MINUTE ESCAPE
+          THE 96-HOUR PIVOT
         </h1>
+        <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
+          Last-minute decision engine for travelers from TLV. Live flights, real conditions, AI sentiment.
+        </p>
         <div className="flex items-center justify-center gap-2 mt-3 text-xs text-muted-foreground">
           <Clock className="w-3 h-3" />
           <span>DEPARTURE WINDOW: {formatDate(now)} → {formatDate(deadline)}</span>
         </div>
-        <div className="text-[10px] text-terminal-amber mt-1 animate-pulse">
-          ▸ 96 HOURS REMAINING
-        </div>
-      </div>
+        <motion.div
+          className="flex items-center justify-center gap-1.5 text-[10px] text-terminal-amber mt-1"
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <Zap className="w-3 h-3" />
+          96 HOURS REMAINING
+        </motion.div>
+      </motion.div>
 
       {/* Mode Selection */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10 w-full max-w-2xl">
-        <button
+      <motion.div
+        className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10 w-full max-w-2xl"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+      >
+        <motion.button
           onClick={() => onSelectMode('winter')}
-          className="group border border-winter rounded-sm p-6 bg-winter glow-winter hover:scale-[1.02] transition-all cursor-pointer"
+          className="group border border-winter rounded-sm p-6 bg-winter glow-winter transition-all cursor-pointer text-left"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
           <Snowflake className="w-10 h-10 text-terminal-cyan mx-auto mb-3 group-hover:animate-spin" />
-          <div className="text-xl font-display font-bold text-terminal-cyan">WINTER</div>
-          <div className="text-xs text-muted-foreground mt-1">Snowboard / Ski</div>
-          <div className="text-[10px] text-terminal-dim mt-2">15 Alpine Destinations</div>
-          <div className="text-[10px] text-terminal-dim">Snow Reports · Ski Passes · Transfers</div>
-        </button>
+          <div className="text-xl font-display font-bold text-terminal-cyan text-center">WINTER</div>
+          <div className="text-xs text-muted-foreground mt-1 text-center">Snowboard / Ski</div>
+          <div className="text-[10px] text-terminal-dim mt-3 space-y-0.5">
+            <div>▸ 15 Alpine & Caucasus Destinations</div>
+            <div>▸ Live Snow Reports + AI Vibe Scores</div>
+            <div>▸ DIY vs Club Med Cost Matrix</div>
+            <div>▸ Late Season High-Altitude Priority</div>
+          </div>
+        </motion.button>
 
-        <button
+        <motion.button
           onClick={() => onSelectMode('summer')}
-          className="group border border-summer rounded-sm p-6 bg-summer glow-summer hover:scale-[1.02] transition-all cursor-pointer"
+          className="group border border-summer rounded-sm p-6 bg-summer glow-summer transition-all cursor-pointer text-left"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
           <Sun className="w-10 h-10 text-terminal-amber mx-auto mb-3 group-hover:animate-spin" />
-          <div className="text-xl font-display font-bold text-terminal-amber">SUMMER</div>
-          <div className="text-xs text-muted-foreground mt-1">Surf / Action</div>
-          <div className="text-[10px] text-terminal-dim mt-2">15 Coastal Destinations</div>
-          <div className="text-[10px] text-terminal-dim">Swell Data · Surf Rentals · Transfers</div>
-        </button>
-      </div>
+          <div className="text-xl font-display font-bold text-terminal-amber text-center">SUMMER</div>
+          <div className="text-xs text-muted-foreground mt-1 text-center">Surf / Kite / Action</div>
+          <div className="text-[10px] text-terminal-dim mt-3 space-y-0.5">
+            <div>▸ 15 Coastal & Island Destinations</div>
+            <div>▸ Swell + Wind + Water Temp Data</div>
+            <div>▸ Climate Guardrail (Monsoon Filter)</div>
+            <div>▸ Rental Car Estimates Included</div>
+          </div>
+        </motion.button>
+      </motion.div>
 
       {/* Controls */}
-      <div className="w-full max-w-2xl space-y-4">
+      <motion.div
+        className="w-full max-w-2xl space-y-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5, duration: 0.4 }}
+      >
         {/* Duration Slider */}
         <div className="border border-border rounded-sm p-4 bg-card">
           <div className="flex items-center justify-between mb-2">
@@ -97,11 +132,25 @@ const LandingScreen = ({ onSelectMode, days, onDaysChange, addLuggage, onToggleL
             <div className={`w-3 h-3 rounded-full mx-0.5 ${addLuggage ? 'bg-primary-foreground' : 'bg-muted-foreground'}`} />
           </div>
         </button>
-      </div>
+      </motion.div>
+
+      {/* Feature badges */}
+      <motion.div
+        className="mt-8 flex flex-wrap justify-center gap-2"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.7 }}
+      >
+        {['AMADEUS FLIGHTS', 'STORMGLASS WEATHER', 'FIRECRAWL SENTIMENT', 'AI VIBE SCORING'].map(label => (
+          <span key={label} className="text-[8px] text-terminal-dim border border-border rounded-sm px-2 py-0.5">
+            {label}
+          </span>
+        ))}
+      </motion.div>
 
       {/* Footer */}
-      <div className="mt-8 text-[9px] text-muted-foreground text-center">
-        <div>ORIGIN: TLV (Ben Gurion) · PRICES IN EUR · ALL MOCK DATA</div>
+      <div className="mt-4 text-[9px] text-muted-foreground text-center">
+        <div>ORIGIN: TLV (Ben Gurion) · PRICES IN EUR · v1.0</div>
         <div className="mt-1">SELECT A MODE TO LOAD DASHBOARD ▴</div>
       </div>
     </div>

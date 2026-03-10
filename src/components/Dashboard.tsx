@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { TravelMode, WinterConditions, SummerConditions, calculateDIYTotal } from '@/data/destinations';
 import DestinationCard from './DestinationCard';
-import { ArrowLeft, Luggage, Clock, Crown, ArrowUpDown, Wifi, WifiOff } from 'lucide-react';
+import { ArrowLeft, Luggage, Clock, Crown, ArrowUpDown, Wifi, WifiOff, Mountain, AlertTriangle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useDestinations } from '@/hooks/useDestinations';
 import { Skeleton } from '@/components/ui/skeleton';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type WinterSort = 'freshSnow' | 'diyTotal' | 'vibeScore' | 'altitude';
 type SummerSort = 'swellHeight' | 'diyTotal' | 'vibeScore' | 'waterTemp';
@@ -23,8 +24,9 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
   const [showPremium, setShowPremium] = useState(false);
   const [sortBy, setSortBy] = useState<string>(isWinter ? 'freshSnow' : 'swellHeight');
   const [hasShownFilterToast, setHasShownFilterToast] = useState(false);
+  const [hasShownLiveToast, setHasShownLiveToast] = useState(false);
 
-  const { destinations: allDestinations, isLive, isLoading, isMock } = useDestinations(mode, days);
+  const { destinations: allDestinations, isLive, isLoading, isMock, lateSeason } = useDestinations(mode, days);
 
   // Climate guardrail: filter out unsafe summer destinations
   const { filtered, removedCount } = useMemo(() => {
@@ -43,6 +45,28 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
       });
     }
   }, [isWinter, removedCount, hasShownFilterToast]);
+
+  // Toast for live data status
+  useEffect(() => {
+    if (!isLoading && isLive && !hasShownLiveToast) {
+      setHasShownLiveToast(true);
+      const liveSources = [];
+      if (isLive.flights) liveSources.push('Flights');
+      if (isLive.weather) liveSources.push('Weather');
+      if (isLive.sentiment) liveSources.push('Sentiment');
+      if (liveSources.length > 0) {
+        toast({
+          title: '🟢 Live Data Connected',
+          description: `${liveSources.join(' · ')} — data is real-time for top destinations.`,
+        });
+      } else {
+        toast({
+          title: '🟡 Using Cached Data',
+          description: 'Live APIs unavailable. Showing last-known data.',
+        });
+      }
+    }
+  }, [isLoading, isLive, hasShownLiveToast]);
 
   // Sort logic
   const destinations = useMemo(() => {
@@ -103,6 +127,14 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {/* Late season indicator */}
+            {lateSeason && (
+              <span className="flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-sm border border-terminal-amber text-terminal-amber bg-terminal-amber/10">
+                <Mountain className="w-2.5 h-2.5" />
+                LATE SEASON
+              </span>
+            )}
+            {/* Live/Mock badge */}
             {!isLoading && (
               <span className={`flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-sm border ${
                 isMock
@@ -112,6 +144,18 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
                 {isMock ? <WifiOff className="w-2.5 h-2.5" /> : <Wifi className="w-2.5 h-2.5" />}
                 {isMock ? 'MOCK' : 'LIVE'}
               </span>
+            )}
+            {/* Data source pills */}
+            {!isLoading && isLive && !isMock && (
+              <div className="hidden md:flex items-center gap-1">
+                {['flights', 'weather', 'sentiment'].map(src => (
+                  <span key={src} className={`text-[8px] px-1 py-0.5 rounded-sm ${
+                    isLive[src as keyof typeof isLive] ? 'bg-terminal-green/10 text-terminal-green' : 'bg-muted text-muted-foreground'
+                  }`}>
+                    {src.toUpperCase()} {isLive[src as keyof typeof isLive] ? '●' : '○'}
+                  </span>
+                ))}
+              </div>
             )}
             <div className="flex items-center gap-1.5 text-[10px] text-terminal-amber">
               <Clock className="w-3 h-3" />
@@ -183,30 +227,73 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="border border-border rounded-sm p-3 space-y-3">
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="border border-border rounded-sm p-3 space-y-3"
+              >
                 <Skeleton className="h-6 w-3/4" />
                 <Skeleton className="h-20 w-full" />
                 <Skeleton className="h-16 w-full" />
                 <Skeleton className="h-12 w-full" />
-              </div>
+              </motion.div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-            {destinations.map((dest) => (
-              <DestinationCard
-                key={dest.id}
-                destination={dest}
-                days={days}
-                addLuggage={addLuggage}
-                showPremium={showPremium}
-              />
-            ))}
-          </div>
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: {},
+              visible: { transition: { staggerChildren: 0.06 } },
+            }}
+          >
+            <AnimatePresence mode="popLayout">
+              {destinations.map((dest) => (
+                <motion.div
+                  key={dest.id}
+                  layout
+                  variants={{
+                    hidden: { opacity: 0, y: 24, scale: 0.97 },
+                    visible: { opacity: 1, y: 0, scale: 1 },
+                  }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                >
+                  <DestinationCard
+                    destination={dest}
+                    days={days}
+                    addLuggage={addLuggage}
+                    showPremium={showPremium}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
         )}
 
-        <div className="text-center text-[9px] text-muted-foreground mt-6 pb-4">
-          ALL DATA IS MOCKED · PRICES FOR ILLUSTRATION ONLY · THE 96-HOUR PIVOT v0.2
+        {/* Footer */}
+        <div className="text-center text-[9px] text-muted-foreground mt-6 pb-4 space-y-1">
+          <div>
+            {isMock ? 'MOCK DATA' : 'LIVE DATA'} · PRICES IN EUR ·{' '}
+            {isLive && !isMock && (
+              <>
+                {isLive.flights && 'AMADEUS '}
+                {isLive.weather && '· STORMGLASS '}
+                {isLive.sentiment && '· AI SENTIMENT '}
+                ·{' '}
+              </>
+            )}
+            THE 96-HOUR PIVOT v1.0
+          </div>
+          {lateSeason && (
+            <div className="text-terminal-amber">
+              ▸ LATE SEASON MODE: HIGH-ALTITUDE RESORTS PRIORITIZED
+            </div>
+          )}
         </div>
       </div>
     </div>

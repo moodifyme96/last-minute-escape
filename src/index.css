@@ -41,6 +41,7 @@
     --terminal-red: 0 80% 55%;
     --terminal-dim: 155 20% 35%;
     --terminal-blue: 210 100% 60%;
+    --terminal-green: 145 80% 50%;
     --winter-primary: 200 100% 60%;
     --winter-glow: 200 100% 40%;
     --summer-primary: 35 100% 55%;
@@ -85,6 +86,15 @@
   }
   .text-terminal-blue {
     color: hsl(var(--terminal-blue));
+  }
+  .text-terminal-green {
+    color: hsl(var(--terminal-green));
+  }
+  .bg-terminal-green\/10 {
+    background-color: hsl(var(--terminal-green) / 0.1);
+  }
+  .border-terminal-green {
+    border-color: hsl(var(--terminal-green));
   }
   .bg-winter {
     background: linear-gradient(135deg, hsl(var(--winter-primary) / 0.15), hsl(var(--winter-glow) / 0.05));

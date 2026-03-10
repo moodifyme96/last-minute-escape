@@ -3,10 +3,17 @@ import { supabase } from '@/integrations/supabase/client';
 import { TravelMode, Destination } from '@/data/types';
 import { getDestinations } from '@/data/destinations';
 
+export interface LiveFlags {
+  flights: boolean;
+  weather: boolean;
+  sentiment: boolean;
+}
+
 interface FetchResult {
   success: boolean;
-  data: Destination[];
-  live: { flights: boolean; weather: boolean; sentiment: boolean };
+  data: (Destination & { _liveFlights?: boolean; _liveWeather?: boolean; _liveSentiment?: boolean })[];
+  live: LiveFlags;
+  lateSeason?: boolean;
 }
 
 async function fetchLiveDestinations(mode: TravelMode, days: number): Promise<FetchResult> {
@@ -26,7 +33,7 @@ export function useDestinations(mode: TravelMode, days: number) {
   const query = useQuery({
     queryKey: ['destinations', mode, days],
     queryFn: () => fetchLiveDestinations(mode, days),
-    staleTime: 15 * 60 * 1000, // 15 min cache
+    staleTime: 15 * 60 * 1000,
     retry: 1,
     refetchOnWindowFocus: false,
   });
@@ -38,5 +45,6 @@ export function useDestinations(mode: TravelMode, days: number) {
     isError: query.isError,
     error: query.error,
     isMock: !query.data?.success,
+    lateSeason: query.data?.lateSeason ?? false,
   };
 }

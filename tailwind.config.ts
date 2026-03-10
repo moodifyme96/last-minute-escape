@@ -24,6 +24,7 @@ export default {
           red: "hsl(var(--terminal-red))",
           dim: "hsl(var(--terminal-dim))",
           blue: "hsl(var(--terminal-blue))",
+          green: "hsl(var(--terminal-green))",
         },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
