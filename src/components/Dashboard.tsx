@@ -1,8 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
-import { TravelMode, getDestinations, WinterConditions, SummerConditions, calculateDIYTotal } from '@/data/destinations';
+import { TravelMode, WinterConditions, SummerConditions, calculateDIYTotal } from '@/data/destinations';
 import DestinationCard from './DestinationCard';
-import { ArrowLeft, Luggage, Clock, Crown, ArrowUpDown } from 'lucide-react';
+import { ArrowLeft, Luggage, Clock, Crown, ArrowUpDown, Wifi, WifiOff } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { useDestinations } from '@/hooks/useDestinations';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type WinterSort = 'freshSnow' | 'diyTotal' | 'vibeScore' | 'altitude';
 type SummerSort = 'swellHeight' | 'diyTotal' | 'vibeScore' | 'waterTemp';
@@ -22,7 +24,7 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
   const [sortBy, setSortBy] = useState<string>(isWinter ? 'freshSnow' : 'swellHeight');
   const [hasShownFilterToast, setHasShownFilterToast] = useState(false);
 
-  const allDestinations = getDestinations(mode);
+  const { destinations: allDestinations, isLive, isLoading, isMock } = useDestinations(mode, days);
 
   // Climate guardrail: filter out unsafe summer destinations
   const { filtered, removedCount } = useMemo(() => {
@@ -100,9 +102,21 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
               <span className="text-[10px] text-muted-foreground">/ {destinations.length} DESTINATIONS / TLV ORIGIN</span>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 text-[10px] text-terminal-amber">
-            <Clock className="w-3 h-3" />
-            <span>{hoursLeft}H WINDOW</span>
+          <div className="flex items-center gap-2">
+            {!isLoading && (
+              <span className={`flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-sm border ${
+                isMock
+                  ? 'text-terminal-amber border-terminal-amber bg-terminal-amber/10'
+                  : 'text-terminal-green border-terminal-green bg-terminal-green/10'
+              }`}>
+                {isMock ? <WifiOff className="w-2.5 h-2.5" /> : <Wifi className="w-2.5 h-2.5" />}
+                {isMock ? 'MOCK' : 'LIVE'}
+              </span>
+            )}
+            <div className="flex items-center gap-1.5 text-[10px] text-terminal-amber">
+              <Clock className="w-3 h-3" />
+              <span>{hoursLeft}H WINDOW</span>
+            </div>
           </div>
         </div>
 
@@ -166,17 +180,30 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
 
       {/* Grid */}
       <div className="container py-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-          {destinations.map((dest) => (
-            <DestinationCard
-              key={dest.id}
-              destination={dest}
-              days={days}
-              addLuggage={addLuggage}
-              showPremium={showPremium}
-            />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="border border-border rounded-sm p-3 space-y-3">
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-20 w-full" />
+                <Skeleton className="h-16 w-full" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+            {destinations.map((dest) => (
+              <DestinationCard
+                key={dest.id}
+                destination={dest}
+                days={days}
+                addLuggage={addLuggage}
+                showPremium={showPremium}
+              />
+            ))}
+          </div>
+        )}
 
         <div className="text-center text-[9px] text-muted-foreground mt-6 pb-4">
           ALL DATA IS MOCKED · PRICES FOR ILLUSTRATION ONLY · THE 96-HOUR PIVOT v0.2
