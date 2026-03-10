@@ -1,13 +1,34 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from 'react';
+import { TravelMode } from '@/data/destinations';
+import LandingScreen from '@/components/LandingScreen';
+import Dashboard from '@/components/Dashboard';
 
 const Index = () => {
+  const [mode, setMode] = useState<TravelMode | null>(null);
+  const [days, setDays] = useState(7);
+  const [addLuggage, setAddLuggage] = useState(false);
+
+  if (!mode) {
+    return (
+      <LandingScreen
+        onSelectMode={setMode}
+        days={days}
+        onDaysChange={setDays}
+        addLuggage={addLuggage}
+        onToggleLuggage={() => setAddLuggage((v) => !v)}
+      />
+    );
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <Dashboard
+      mode={mode}
+      days={days}
+      onDaysChange={setDays}
+      addLuggage={addLuggage}
+      onToggleLuggage={() => setAddLuggage((v) => !v)}
+      onBack={() => setMode(null)}
+    />
   );
 };
 
