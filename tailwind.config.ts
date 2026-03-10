@@ -7,13 +7,24 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
+      padding: "1rem",
       screens: {
-        "2xl": "1400px",
+        "2xl": "1600px",
       },
     },
     extend: {
+      fontFamily: {
+        mono: ["'JetBrains Mono'", "monospace"],
+        display: ["'Space Grotesk'", "sans-serif"],
+      },
       colors: {
+        terminal: {
+          cyan: "hsl(var(--terminal-cyan))",
+          amber: "hsl(var(--terminal-amber))",
+          red: "hsl(var(--terminal-red))",
+          dim: "hsl(var(--terminal-dim))",
+          blue: "hsl(var(--terminal-blue))",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
