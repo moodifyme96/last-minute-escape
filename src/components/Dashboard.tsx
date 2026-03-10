@@ -102,9 +102,21 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
               <span className="text-[10px] text-muted-foreground">/ {destinations.length} DESTINATIONS / TLV ORIGIN</span>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 text-[10px] text-terminal-amber">
-            <Clock className="w-3 h-3" />
-            <span>{hoursLeft}H WINDOW</span>
+          <div className="flex items-center gap-2">
+            {!isLoading && (
+              <span className={`flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-sm border ${
+                isMock
+                  ? 'text-terminal-amber border-terminal-amber bg-terminal-amber/10'
+                  : 'text-terminal-green border-terminal-green bg-terminal-green/10'
+              }`}>
+                {isMock ? <WifiOff className="w-2.5 h-2.5" /> : <Wifi className="w-2.5 h-2.5" />}
+                {isMock ? 'MOCK' : 'LIVE'}
+              </span>
+            )}
+            <div className="flex items-center gap-1.5 text-[10px] text-terminal-amber">
+              <Clock className="w-3 h-3" />
+              <span>{hoursLeft}H WINDOW</span>
+            </div>
           </div>
         </div>
 
