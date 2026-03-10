@@ -24,7 +24,7 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
   const [sortBy, setSortBy] = useState<string>(isWinter ? 'freshSnow' : 'swellHeight');
   const [hasShownFilterToast, setHasShownFilterToast] = useState(false);
 
-  const allDestinations = getDestinations(mode);
+  const { destinations: allDestinations, isLive, isLoading, isMock } = useDestinations(mode, days);
 
   // Climate guardrail: filter out unsafe summer destinations
   const { filtered, removedCount } = useMemo(() => {
