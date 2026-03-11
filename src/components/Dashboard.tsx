@@ -1,11 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
 import { TravelMode, WinterConditions, SummerConditions, calculateDIYTotal } from '@/data/destinations';
 import DestinationCard from './DestinationCard';
-import { ArrowLeft, Luggage, Clock, Crown, ArrowUpDown, Wifi, WifiOff, Mountain, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Luggage, Clock, Crown, ArrowUpDown, Wifi, WifiOff, Mountain, CalendarIcon } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useDestinations } from '@/hooks/useDestinations';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
+import { format, addDays, startOfDay } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 type WinterSort = 'freshSnow' | 'diyTotal' | 'vibeScore' | 'altitude';
 type SummerSort = 'swellHeight' | 'diyTotal' | 'vibeScore' | 'waterTemp';
