@@ -15,10 +15,12 @@ interface DestinationCardProps {
 
 const DestinationCard = ({ destination: dest, days, addLuggage, showPremium }: DestinationCardProps) => {
   const isWinter = dest.mode === 'winter';
-  const diyTotal = calculateDIYTotal(dest, days, addLuggage);
-  const clubTotal = calculateClubMedTotal(dest, days, addLuggage);
+  const activityDays = dest.effectiveDays ?? days;
+  const diyTotal = calculateDIYTotal(dest, activityDays, addLuggage);
+  const clubTotal = calculateClubMedTotal(dest, activityDays, addLuggage);
   const f = dest.flights;
   const hasLiveData = dest._liveFlights || dest._liveWeather || dest._liveSentiment;
+  const daysLost = days - activityDays;
 
   // Check if flight data is missing (fallback)
   const flightsMissing = f.outbound.airline === '—';
