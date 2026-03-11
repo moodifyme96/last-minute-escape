@@ -7,7 +7,7 @@ import FlightZone from './card/FlightZone';
 import CostBreakdown from './card/CostBreakdown';
 
 interface DestinationCardProps {
-  destination: Destination & { _liveFlights?: boolean; _liveWeather?: boolean; _liveSentiment?: boolean };
+  destination: Destination & { _liveFlights?: boolean; _liveWeather?: boolean; _liveSentiment?: boolean; effectiveDays?: number };
   days: number;
   addLuggage: boolean;
   showPremium: boolean;
