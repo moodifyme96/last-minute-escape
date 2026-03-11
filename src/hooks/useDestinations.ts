@@ -11,14 +11,14 @@ export interface LiveFlags {
 
 interface FetchResult {
   success: boolean;
-  data: (Destination & { _liveFlights?: boolean; _liveWeather?: boolean; _liveSentiment?: boolean })[];
+  data: (Destination & { _liveFlights?: boolean; _liveWeather?: boolean; _liveSentiment?: boolean; effectiveDays?: number })[];
   live: LiveFlags;
   lateSeason?: boolean;
 }
 
-async function fetchLiveDestinations(mode: TravelMode, days: number): Promise<FetchResult> {
+async function fetchLiveDestinations(mode: TravelMode, days: number, departureDate?: string): Promise<FetchResult> {
   const { data, error } = await supabase.functions.invoke('fetch-destinations', {
-    body: { mode, days },
+    body: { mode, days, departureDate },
   });
 
   if (error) throw error;
@@ -27,12 +27,12 @@ async function fetchLiveDestinations(mode: TravelMode, days: number): Promise<Fe
   return data as FetchResult;
 }
 
-export function useDestinations(mode: TravelMode, days: number) {
+export function useDestinations(mode: TravelMode, days: number, departureDate?: string) {
   const fallback = getDestinations(mode);
 
   const query = useQuery({
-    queryKey: ['destinations', mode, days],
-    queryFn: () => fetchLiveDestinations(mode, days),
+    queryKey: ['destinations', mode, days, departureDate],
+    queryFn: () => fetchLiveDestinations(mode, days, departureDate),
     staleTime: 15 * 60 * 1000,
     retry: 1,
     refetchOnWindowFocus: false,

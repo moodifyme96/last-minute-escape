@@ -1,6 +1,11 @@
 import { TravelMode } from '@/data/destinations';
-import { Snowflake, Sun, Luggage, Clock, Zap } from 'lucide-react';
+import { Snowflake, Sun, Luggage, Clock, Zap, CalendarIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { format, addDays, startOfDay } from 'date-fns';
+import { cn } from '@/lib/utils';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { Button } from '@/components/ui/button';
 
 interface LandingScreenProps {
   onSelectMode: (mode: TravelMode) => void;
@@ -8,12 +13,14 @@ interface LandingScreenProps {
   onDaysChange: (days: number) => void;
   addLuggage: boolean;
   onToggleLuggage: () => void;
+  departureDate: Date;
+  onDepartureDateChange: (date: Date) => void;
 }
 
-const LandingScreen = ({ onSelectMode, days, onDaysChange, addLuggage, onToggleLuggage }: LandingScreenProps) => {
+const LandingScreen = ({ onSelectMode, days, onDaysChange, addLuggage, onToggleLuggage, departureDate, onDepartureDateChange }: LandingScreenProps) => {
   const now = new Date();
-  const deadline = new Date(now.getTime() + 96 * 60 * 60 * 1000);
-  const formatDate = (d: Date) => d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+  const minDate = startOfDay(addDays(now, 0)); // today
+  const maxDate = startOfDay(addDays(now, 4));  // 4 days out
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 scanline">
@@ -35,7 +42,7 @@ const LandingScreen = ({ onSelectMode, days, onDaysChange, addLuggage, onToggleL
         </p>
         <div className="flex items-center justify-center gap-2 mt-3 text-xs text-muted-foreground">
           <Clock className="w-3 h-3" />
-          <span>DEPARTURE WINDOW: {formatDate(now)} → {formatDate(deadline)}</span>
+          <span>DEPARTURE WINDOW: {format(minDate, 'dd MMM')} → {format(maxDate, 'dd MMM')}</span>
         </div>
         <motion.div
           className="flex items-center justify-center gap-1.5 text-[10px] text-terminal-amber mt-1"
@@ -64,7 +71,7 @@ const LandingScreen = ({ onSelectMode, days, onDaysChange, addLuggage, onToggleL
           <div className="text-xl font-display font-bold text-terminal-cyan text-center">WINTER</div>
           <div className="text-xs text-muted-foreground mt-1 text-center">Snowboard / Ski</div>
           <div className="text-[10px] text-terminal-dim mt-3 space-y-0.5">
-            <div>▸ 15 Alpine & Caucasus Destinations</div>
+            <div>▸ 17 Alpine, Pyrenees & Caucasus Destinations</div>
             <div>▸ Live Snow Reports + AI Vibe Scores</div>
             <div>▸ DIY vs Club Med Cost Matrix</div>
             <div>▸ Late Season High-Altitude Priority</div>
@@ -96,6 +103,36 @@ const LandingScreen = ({ onSelectMode, days, onDaysChange, addLuggage, onToggleL
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5, duration: 0.4 }}
       >
+        {/* Departure Date Picker */}
+        <div className="border border-border rounded-sm p-4 bg-card">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] text-muted-foreground uppercase tracking-widest">▸ DEPARTURE DATE</span>
+            <span className="text-[9px] text-terminal-amber">WITHIN 96H WINDOW</span>
+          </div>
+          <div className="flex gap-2">
+            {[0, 1, 2, 3].map(offset => {
+              const d = addDays(startOfDay(now), offset + 1);
+              const isSelected = startOfDay(departureDate).getTime() === d.getTime();
+              const dayLabel = offset === 0 ? 'TOMORROW' : format(d, 'EEE').toUpperCase();
+              return (
+                <button
+                  key={offset}
+                  onClick={() => onDepartureDateChange(d)}
+                  className={cn(
+                    'flex-1 border rounded-sm p-2 text-center transition-all cursor-pointer',
+                    isSelected
+                      ? 'border-primary bg-primary/10 text-foreground'
+                      : 'border-border bg-card text-muted-foreground hover:border-muted-foreground'
+                  )}
+                >
+                  <div className="text-[9px] font-bold">{dayLabel}</div>
+                  <div className="text-xs font-semibold">{format(d, 'dd MMM')}</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Duration Slider */}
         <div className="border border-border rounded-sm p-4 bg-card">
           <div className="flex items-center justify-between mb-2">
@@ -141,7 +178,7 @@ const LandingScreen = ({ onSelectMode, days, onDaysChange, addLuggage, onToggleL
         animate={{ opacity: 1 }}
         transition={{ delay: 0.7 }}
       >
-        {['AMADEUS FLIGHTS', 'STORMGLASS WEATHER', 'FIRECRAWL SENTIMENT', 'AI VIBE SCORING'].map(label => (
+        {['AMADEUS FLIGHTS', 'AI CONDITIONS', 'FIRECRAWL SENTIMENT', 'AI VIBE SCORING', 'MULTI-HUB COMPARE'].map(label => (
           <span key={label} className="text-[8px] text-terminal-dim border border-border rounded-sm px-2 py-0.5">
             {label}
           </span>

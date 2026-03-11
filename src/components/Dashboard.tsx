@@ -1,11 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
 import { TravelMode, WinterConditions, SummerConditions, calculateDIYTotal } from '@/data/destinations';
 import DestinationCard from './DestinationCard';
-import { ArrowLeft, Luggage, Clock, Crown, ArrowUpDown, Wifi, WifiOff, Mountain, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Luggage, Clock, Crown, ArrowUpDown, Wifi, WifiOff, Mountain, CalendarIcon } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useDestinations } from '@/hooks/useDestinations';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
+import { format, addDays, startOfDay } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 type WinterSort = 'freshSnow' | 'diyTotal' | 'vibeScore' | 'altitude';
 type SummerSort = 'swellHeight' | 'diyTotal' | 'vibeScore' | 'waterTemp';
@@ -17,16 +19,19 @@ interface DashboardProps {
   addLuggage: boolean;
   onToggleLuggage: () => void;
   onBack: () => void;
+  departureDate: Date;
+  onDepartureDateChange: (date: Date) => void;
 }
 
-const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBack }: DashboardProps) => {
+const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBack, departureDate, onDepartureDateChange }: DashboardProps) => {
   const isWinter = mode === 'winter';
   const [showPremium, setShowPremium] = useState(false);
   const [sortBy, setSortBy] = useState<string>(isWinter ? 'freshSnow' : 'swellHeight');
   const [hasShownFilterToast, setHasShownFilterToast] = useState(false);
   const [hasShownLiveToast, setHasShownLiveToast] = useState(false);
 
-  const { destinations: allDestinations, isLive, isLoading, isMock, lateSeason } = useDestinations(mode, days);
+  const depDateStr = format(departureDate, 'yyyy-MM-dd');
+  const { destinations: allDestinations, isLive, isLoading, isMock, lateSeason } = useDestinations(mode, days, depDateStr);
 
   // Climate guardrail: filter out unsafe summer destinations
   const { filtered, removedCount } = useMemo(() => {
@@ -166,6 +171,31 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
 
         {/* Controls Bar */}
         <div className="container flex items-center gap-4 py-2 border-t border-border flex-wrap">
+          {/* Departure Date */}
+          <div className="flex items-center gap-1.5">
+            <CalendarIcon className="w-3 h-3 text-muted-foreground" />
+            <div className="flex gap-1">
+              {[0, 1, 2, 3].map(offset => {
+                const d = addDays(startOfDay(new Date()), offset + 1);
+                const isSelected = startOfDay(departureDate).getTime() === d.getTime();
+                return (
+                  <button
+                    key={offset}
+                    onClick={() => onDepartureDateChange(d)}
+                    className={cn(
+                      'px-1.5 py-0.5 rounded-sm text-[9px] font-bold transition-all cursor-pointer border',
+                      isSelected
+                        ? 'border-primary bg-primary/10 text-foreground'
+                        : 'border-border text-muted-foreground hover:border-muted-foreground'
+                    )}
+                  >
+                    {format(d, 'dd/MM')}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Duration */}
           <div className="flex items-center gap-2 flex-1 min-w-[180px]">
             <span className="text-[10px] text-muted-foreground whitespace-nowrap">DURATION:</span>
