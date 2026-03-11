@@ -111,7 +111,7 @@ const DestinationCard = ({ destination: dest, days, addLuggage, showPremium }: D
           )
         ) : (
           <>
-            <CostBreakdown dest={dest} days={days} addLuggage={addLuggage} isWinter={isWinter} />
+            <CostBreakdown dest={dest} days={activityDays} addLuggage={addLuggage} isWinter={isWinter} />
 
             <div className={`flex items-center justify-between p-1.5 rounded-sm border mb-1.5 ${isWinter ? 'border-winter' : 'border-summer'}`}>
               <span className="text-[10px] font-semibold text-foreground flex items-center gap-1">
