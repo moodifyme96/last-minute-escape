@@ -7,7 +7,7 @@ import FlightZone from './card/FlightZone';
 import CostBreakdown from './card/CostBreakdown';
 
 interface DestinationCardProps {
-  destination: Destination & { _liveFlights?: boolean; _liveWeather?: boolean; _liveSentiment?: boolean };
+  destination: Destination & { _liveFlights?: boolean; _liveWeather?: boolean; _liveSentiment?: boolean; effectiveDays?: number };
   days: number;
   addLuggage: boolean;
   showPremium: boolean;
@@ -15,10 +15,12 @@ interface DestinationCardProps {
 
 const DestinationCard = ({ destination: dest, days, addLuggage, showPremium }: DestinationCardProps) => {
   const isWinter = dest.mode === 'winter';
-  const diyTotal = calculateDIYTotal(dest, days, addLuggage);
-  const clubTotal = calculateClubMedTotal(dest, days, addLuggage);
+  const activityDays = dest.effectiveDays ?? days;
+  const diyTotal = calculateDIYTotal(dest, activityDays, addLuggage);
+  const clubTotal = calculateClubMedTotal(dest, activityDays, addLuggage);
   const f = dest.flights;
   const hasLiveData = dest._liveFlights || dest._liveWeather || dest._liveSentiment;
+  const daysLost = days - activityDays;
 
   // Check if flight data is missing (fallback)
   const flightsMissing = f.outbound.airline === '—';
@@ -77,8 +79,11 @@ const DestinationCard = ({ destination: dest, days, addLuggage, showPremium }: D
 
       {/* Zone 3: Totals */}
       <div className="px-3 py-2">
-        <div className="text-[10px] text-muted-foreground mb-1.5 uppercase tracking-widest">
-          ▸ {days}D COST AGGREGATOR
+        <div className="text-[10px] text-muted-foreground mb-1.5 uppercase tracking-widest flex items-center gap-2">
+          <span>▸ {activityDays}D ACTIVITY / {days}D TRIP</span>
+          {daysLost > 0 && (
+            <span className="text-[8px] text-terminal-amber">({daysLost > 1 ? `${daysLost} days` : '1 day'} travel)</span>
+          )}
         </div>
 
         {flightsMissing ? (
@@ -106,7 +111,7 @@ const DestinationCard = ({ destination: dest, days, addLuggage, showPremium }: D
           )
         ) : (
           <>
-            <CostBreakdown dest={dest} days={days} addLuggage={addLuggage} isWinter={isWinter} />
+            <CostBreakdown dest={dest} days={activityDays} addLuggage={addLuggage} isWinter={isWinter} />
 
             <div className={`flex items-center justify-between p-1.5 rounded-sm border mb-1.5 ${isWinter ? 'border-winter' : 'border-summer'}`}>
               <span className="text-[10px] font-semibold text-foreground flex items-center gap-1">
