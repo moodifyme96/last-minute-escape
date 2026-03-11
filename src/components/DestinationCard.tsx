@@ -79,8 +79,11 @@ const DestinationCard = ({ destination: dest, days, addLuggage, showPremium }: D
 
       {/* Zone 3: Totals */}
       <div className="px-3 py-2">
-        <div className="text-[10px] text-muted-foreground mb-1.5 uppercase tracking-widest">
-          ▸ {days}D COST AGGREGATOR
+        <div className="text-[10px] text-muted-foreground mb-1.5 uppercase tracking-widest flex items-center gap-2">
+          <span>▸ {activityDays}D ACTIVITY / {days}D TRIP</span>
+          {daysLost > 0 && (
+            <span className="text-[8px] text-terminal-amber">({daysLost > 1 ? `${daysLost} days` : '1 day'} travel)</span>
+          )}
         </div>
 
         {flightsMissing ? (
