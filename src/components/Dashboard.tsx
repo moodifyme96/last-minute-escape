@@ -171,6 +171,31 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
 
         {/* Controls Bar */}
         <div className="container flex items-center gap-4 py-2 border-t border-border flex-wrap">
+          {/* Departure Date */}
+          <div className="flex items-center gap-1.5">
+            <CalendarIcon className="w-3 h-3 text-muted-foreground" />
+            <div className="flex gap-1">
+              {[0, 1, 2, 3].map(offset => {
+                const d = addDays(startOfDay(new Date()), offset + 1);
+                const isSelected = startOfDay(departureDate).getTime() === d.getTime();
+                return (
+                  <button
+                    key={offset}
+                    onClick={() => onDepartureDateChange(d)}
+                    className={cn(
+                      'px-1.5 py-0.5 rounded-sm text-[9px] font-bold transition-all cursor-pointer border',
+                      isSelected
+                        ? 'border-primary bg-primary/10 text-foreground'
+                        : 'border-border text-muted-foreground hover:border-muted-foreground'
+                    )}
+                  >
+                    {format(d, 'dd/MM')}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Duration */}
           <div className="flex items-center gap-2 flex-1 min-w-[180px]">
             <span className="text-[10px] text-muted-foreground whitespace-nowrap">DURATION:</span>
