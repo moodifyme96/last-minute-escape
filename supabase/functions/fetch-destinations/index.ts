@@ -388,7 +388,9 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { mode, days } = await req.json() as { mode: "winter" | "summer"; days: number };
+    const { mode, days, departureDate: reqDepDate } = await req.json() as {
+      mode: "winter" | "summer"; days: number; departureDate?: string;
+    };
 
     const entries = Object.entries(REGISTRY).filter(([_, v]) => isSeasonSafe(v, mode));
     if (entries.length === 0) {
@@ -396,13 +398,24 @@ serve(async (req) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
-    const ret = new Date(tomorrow); ret.setDate(ret.getDate() + days - 1);
-    const fmtDate = (d: Date) => d.toISOString().split("T")[0];
-    const depDate = fmtDate(tomorrow);
-    const retDate = fmtDate(ret);
-
+    // Departure date: use provided or default to tomorrow
+    // Validate it's within next 4 days
     const now = new Date();
+    let depDateObj: Date;
+    if (reqDepDate) {
+      depDateObj = new Date(reqDepDate + "T00:00:00Z");
+      const maxDate = new Date(now); maxDate.setDate(maxDate.getDate() + 4);
+      if (depDateObj < now || depDateObj > maxDate) {
+        depDateObj = new Date(now); depDateObj.setDate(depDateObj.getDate() + 1);
+      }
+    } else {
+      depDateObj = new Date(now); depDateObj.setDate(depDateObj.getDate() + 1);
+    }
+    const retDateObj = new Date(depDateObj); retDateObj.setDate(retDateObj.getDate() + days - 1);
+    const fmtDate = (d: Date) => d.toISOString().split("T")[0];
+    const depDate = fmtDate(depDateObj);
+    const retDate = fmtDate(retDateObj);
+
     const isLateSeason = mode === "winter" && (now.getMonth() > 1 || (now.getMonth() === 1 && now.getDate() > 15));
 
     const sortedEntries = [...entries];
@@ -410,7 +423,7 @@ serve(async (req) => {
       sortedEntries.sort((a, b) => (b[1].altitude || 0) - (a[1].altitude || 0));
     }
 
-    // ── Parallel: Flights + LLM (conditions+costs) + Sentiment ──
+    // ── Parallel: Flights token + LLM (conditions+costs) + Sentiment ──
     const sentimentDests = sortedEntries.map(([id, v]) => ({ id, name: v.name, mode, searchTerms: v.searchTerms }));
     const llmDests = sortedEntries.map(([id, v]) => ({ id, name: v.name, country: v.country, mode, altitude: v.altitude }));
 
@@ -420,64 +433,53 @@ serve(async (req) => {
       fetchSentimentBatch(sentimentDests),
     ]);
 
-    // Flights: try each hub in order, pick the one that returns results
-    // Use first hub as primary, but for destinations that share hubs, batch them
+    // ── Flights: search ALL hubs per destination, pick cheapest total ──
     const flightsData: Record<string, any> = {};
     if (token) {
-      // Build map: hub -> destination IDs that want this hub
-      const hubSearches: { hub: string; ids: string[]; transferMinutes: number }[] = [];
-      
-      for (const [id, reg] of sortedEntries) {
-        // First try primary hub
-        hubSearches.push({ hub: reg.hubs[0], ids: [id], transferMinutes: reg.transferMinutes[0] });
+      // Collect all unique hubs we need to search
+      const allHubs = new Set<string>();
+      for (const [_, reg] of sortedEntries) {
+        for (const hub of reg.hubs) allHubs.add(hub);
       }
-      
-      // Deduplicate hub searches
-      const uniqueHubSearches = new Map<string, { hub: string; ids: string[]; transferMinutes: Map<string, number> }>();
-      for (const hs of hubSearches) {
-        const existing = uniqueHubSearches.get(hs.hub);
-        if (existing) {
-          existing.ids.push(...hs.ids);
-          for (const id of hs.ids) existing.transferMinutes.set(id, hs.transferMinutes);
-        } else {
-          const tm = new Map<string, number>();
-          for (const id of hs.ids) tm.set(id, hs.transferMinutes);
-          uniqueHubSearches.set(hs.hub, { hub: hs.hub, ids: hs.ids, transferMinutes: tm });
-        }
-      }
-      
-      for (const [hub, info] of uniqueHubSearches) {
+
+      // Search each unique hub once
+      const hubResults = new Map<string, any>();
+      for (const hub of allHubs) {
         await new Promise(r => setTimeout(r, 120));
         const result = await searchFlight(token, hub, depDate, retDate);
-        for (const id of info.ids) {
-          if (!flightsData[id]) {
-            if (result) {
-              const transferMin = info.transferMinutes.get(id) || 60;
-              flightsData[id] = { ...result, airportTransfer: Math.round(transferMin <= 60 ? 30 : transferMin <= 120 ? 50 : transferMin <= 180 ? 70 : 90) };
-            }
+        hubResults.set(hub, result);
+      }
+
+      // For each destination, compare all hub options and pick cheapest total
+      for (const [id, reg] of sortedEntries) {
+        let bestOption: any = null;
+        let bestTotalCost = Infinity;
+
+        for (let i = 0; i < reg.hubs.length; i++) {
+          const hub = reg.hubs[i];
+          const result = hubResults.get(hub);
+          if (!result) continue;
+
+          const transferMin = reg.transferMinutes[i] || 120;
+          const transferCost = Math.round(transferMin <= 60 ? 30 : transferMin <= 120 ? 50 : transferMin <= 180 ? 70 : 90);
+          const flightCost = result.outbound.baseFare + result.returnLeg.baseFare;
+          const totalCost = flightCost + (transferCost * 2); // round trip transfer
+
+          if (totalCost < bestTotalCost) {
+            bestTotalCost = totalCost;
+            bestOption = { ...result, hub, airportTransfer: transferCost };
           }
         }
-      }
-      
-      // For destinations with no flight results, try secondary hubs
-      for (const [id, reg] of sortedEntries) {
-        if (!flightsData[id] && reg.hubs.length > 1) {
-          for (let i = 1; i < reg.hubs.length; i++) {
-            await new Promise(r => setTimeout(r, 120));
-            const result = await searchFlight(token, reg.hubs[i], depDate, retDate);
-            if (result) {
-              const transferMin = reg.transferMinutes[i] || 120;
-              flightsData[id] = { ...result, airportTransfer: Math.round(transferMin <= 60 ? 30 : transferMin <= 120 ? 50 : transferMin <= 180 ? 70 : 90) };
-              break;
-            }
-          }
+
+        if (bestOption) {
+          flightsData[id] = bestOption;
         }
       }
     }
 
     const liveFlags = {
       flights: !!token && Object.values(flightsData).some(v => v !== null),
-      weather: Object.keys(llmData).length > 0, // LLM provides conditions
+      weather: Object.keys(llmData).length > 0,
       sentiment: Object.keys(sentimentData).length > 0,
     };
 
@@ -495,16 +497,11 @@ serve(async (req) => {
       };
 
       const safeFlag = mode === "summer" ? isSeasonSafe(reg, "summer") : true;
-      
-      // Conditions: prefer LLM data, fall back to defaults
+
       let conditions: any;
       if (llm?.conditions) {
         if (mode === "winter") {
-          conditions = {
-            ...llm.conditions,
-            altitude: reg.altitude || 1800,
-            stormDaysAgo: llm.conditions.recentStorm ? 0 : undefined,
-          };
+          conditions = { ...llm.conditions, altitude: reg.altitude || 1800, stormDaysAgo: llm.conditions.recentStorm ? 0 : undefined };
         } else {
           conditions = { ...llm.conditions, safeSeasonFlag: safeFlag };
         }
@@ -514,34 +511,27 @@ serve(async (req) => {
           : { waterTempC: 0, swellHeightM: 0, swellPeriodS: 0, windKnots: 0, uvIndex: 0, sunnyDays: 0, rainyDays: 0, safeSeasonFlag: safeFlag };
       }
 
-      // Costs: prefer LLM data
       const costs = llm?.costs || reg.defaultCosts;
 
-      // Calculate effective activity days
       let effectiveDays = days;
       if (fl?._arrivalHour != null && fl?._departureHour != null) {
-        const transferMin = reg.transferMinutes[reg.hubs.indexOf(fl.hub)] || reg.transferMinutes[0] || 60;
+        const hubIdx = reg.hubs.indexOf(fl.hub);
+        const transferMin = hubIdx >= 0 ? reg.transferMinutes[hubIdx] : reg.transferMinutes[0] || 60;
         effectiveDays = calcEffectiveActivityDays(days, fl._arrivalHour, fl._departureHour, transferMin);
       }
 
       const fallbackSentiment = { vibeScore: 0, summary: "Data temporarily unavailable.", sources: [], lastUpdated: new Date().toISOString() };
 
-      // Build clean flight object (remove internal metadata)
       const flights = fl
         ? { origin: fl.origin, hub: fl.hub, outbound: fl.outbound, returnLeg: fl.returnLeg, baggageFee: fl.baggageFee, airportTransfer: fl.airportTransfer }
         : fallbackFlights;
 
       return {
         id, name: reg.name, country: reg.country, region: reg.region, mode,
-        flights,
-        conditions,
+        flights, conditions,
         sentiment: st || fallbackSentiment,
-        costs,
-        effectiveDays,
-        _liveFlights: !!fl,
-        _liveWeather: !!llm?.conditions,
-        _liveSentiment: !!st,
-        _llmCosts: !!llm?.costs,
+        costs, effectiveDays,
+        _liveFlights: !!fl, _liveWeather: !!llm?.conditions, _liveSentiment: !!st, _llmCosts: !!llm?.costs,
       };
     });
 
