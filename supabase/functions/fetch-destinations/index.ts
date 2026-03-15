@@ -10,10 +10,12 @@ const corsHeaders = {
 interface RegistryEntry {
   name: string; country: string; region: string;
   seasons: ("winter" | "summer")[];
-  hubs: string[]; // multiple airport options, ordered by preference (biggest/cheapest first)
+  hubs: string[];
   lat: number; lng: number; altitude?: number;
-  transferMinutes: number[]; // parallel to hubs — minutes from airport to resort
-  searchTerms: string[];
+  transferMinutes: number[];
+  conditionSearchQueries: string[]; // queries to find REAL current conditions
+  pricingSearchQueries: string[];   // queries to find REAL current pricing
+  sentimentSearchTerms: string[];
   safeMonths?: number[];
   defaultCosts: {
     accommodationPerNight: number; activityCostPerDay: number;
@@ -24,103 +26,310 @@ interface RegistryEntry {
 
 const REGISTRY: Record<string, RegistryEntry> = {
   // ─── WINTER ───
-  w1:  { name: "Val Thorens", country: "FR", region: "Alps", seasons: ["winter"], hubs: ["LYS", "GVA"], lat: 45.298, lng: 6.580, altitude: 2300, transferMinutes: [150, 180], searchTerms: ["Val Thorens snow conditions snow report this week"], defaultCosts: { accommodationPerNight: 95, activityCostPerDay: 72, clubMedPerNight: 285, clubMedActivityIncluded: true } },
-  w2:  { name: "Innsbruck (Nordkette)", country: "AT", region: "Alps", seasons: ["winter"], hubs: ["INN", "MUC"], lat: 47.260, lng: 11.394, altitude: 1800, transferMinutes: [15, 120], searchTerms: ["Innsbruck Nordkette ski conditions snow report"], defaultCosts: { accommodationPerNight: 85, activityCostPerDay: 56, clubMedPerNight: 260, clubMedActivityIncluded: true } },
-  w3:  { name: "Chamonix", country: "FR", region: "Alps", seasons: ["winter"], hubs: ["GVA", "LYS"], lat: 45.924, lng: 6.870, altitude: 2400, transferMinutes: [80, 180], searchTerms: ["Chamonix snow conditions avalanche report"], defaultCosts: { accommodationPerNight: 115, activityCostPerDay: 68, clubMedPerNight: 310, clubMedActivityIncluded: true } },
-  w4:  { name: "Zermatt", country: "CH", region: "Alps", seasons: ["winter"], hubs: ["ZRH", "GVA"], lat: 46.020, lng: 7.749, altitude: 2600, transferMinutes: [210, 240], searchTerms: ["Zermatt snow report piste conditions"], defaultCosts: { accommodationPerNight: 170, activityCostPerDay: 85, clubMedPerNight: 380, clubMedActivityIncluded: true } },
-  w5:  { name: "St. Anton", country: "AT", region: "Alps", seasons: ["winter"], hubs: ["INN", "ZRH"], lat: 47.128, lng: 10.268, altitude: 1800, transferMinutes: [75, 150], searchTerms: ["St Anton am Arlberg snow conditions"], defaultCosts: { accommodationPerNight: 95, activityCostPerDay: 62, clubMedPerNight: 270, clubMedActivityIncluded: true } },
-  w6:  { name: "Bansko", country: "BG", region: "Balkans", seasons: ["winter"], hubs: ["SOF"], lat: 41.838, lng: 23.489, altitude: 1400, transferMinutes: [150], searchTerms: ["Bansko ski conditions snow report"], defaultCosts: { accommodationPerNight: 35, activityCostPerDay: 35, clubMedPerNight: 155, clubMedActivityIncluded: true } },
-  w7:  { name: "Livigno", country: "IT", region: "Alps", seasons: ["winter"], hubs: ["MXP", "INN"], lat: 46.538, lng: 10.136, altitude: 1800, transferMinutes: [210, 180], searchTerms: ["Livigno snow conditions snowpark"], defaultCosts: { accommodationPerNight: 75, activityCostPerDay: 48, clubMedPerNight: 220, clubMedActivityIncluded: true } },
-  w8:  { name: "Gudauri", country: "GE", region: "Caucasus", seasons: ["winter"], hubs: ["TBS"], lat: 42.458, lng: 44.470, altitude: 2200, transferMinutes: [120], searchTerms: ["Gudauri snow conditions freeride report"], defaultCosts: { accommodationPerNight: 40, activityCostPerDay: 20, clubMedPerNight: 0, clubMedActivityIncluded: false } },
-  w9:  { name: "Verbier", country: "CH", region: "Alps", seasons: ["winter"], hubs: ["GVA", "ZRH"], lat: 46.096, lng: 7.228, altitude: 2200, transferMinutes: [120, 180], searchTerms: ["Verbier snow conditions Mont Fort"], defaultCosts: { accommodationPerNight: 185, activityCostPerDay: 78, clubMedPerNight: 395, clubMedActivityIncluded: true } },
-  w10: { name: "Grandvalira (Soldeu)", country: "AD", region: "Pyrenees", seasons: ["winter"], hubs: ["BCN", "TLS"], lat: 42.576, lng: 1.668, altitude: 1710, transferMinutes: [180, 150], searchTerms: ["Grandvalira Soldeu Andorra snow conditions ski"], defaultCosts: { accommodationPerNight: 70, activityCostPerDay: 52, clubMedPerNight: 235, clubMedActivityIncluded: true } },
-  w11: { name: "Tignes", country: "FR", region: "Alps", seasons: ["winter"], hubs: ["LYS", "GVA"], lat: 45.468, lng: 6.907, altitude: 2100, transferMinutes: [150, 180], searchTerms: ["Tignes snow conditions Espace Killy"], defaultCosts: { accommodationPerNight: 90, activityCostPerDay: 68, clubMedPerNight: 290, clubMedActivityIncluded: true } },
-  w12: { name: "Kitzbühel", country: "AT", region: "Alps", seasons: ["winter"], hubs: ["SZG", "MUC", "INN"], lat: 47.449, lng: 12.392, altitude: 1600, transferMinutes: [80, 120, 100], searchTerms: ["Kitzbühel snow report ski conditions"], defaultCosts: { accommodationPerNight: 110, activityCostPerDay: 60, clubMedPerNight: 275, clubMedActivityIncluded: true } },
-  w13: { name: "Borovets", country: "BG", region: "Balkans", seasons: ["winter"], hubs: ["SOF"], lat: 42.265, lng: 23.608, altitude: 1300, transferMinutes: [75], searchTerms: ["Borovets snow conditions Bulgaria ski"], defaultCosts: { accommodationPerNight: 30, activityCostPerDay: 28, clubMedPerNight: 140, clubMedActivityIncluded: true } },
-  w14: { name: "Cervinia", country: "IT", region: "Alps", seasons: ["winter"], hubs: ["TRN", "MXP"], lat: 45.934, lng: 7.631, altitude: 2500, transferMinutes: [120, 150], searchTerms: ["Cervinia snow conditions Plateau Rosa"], defaultCosts: { accommodationPerNight: 90, activityCostPerDay: 62, clubMedPerNight: 265, clubMedActivityIncluded: true } },
-  w15: { name: "Jasná", country: "SK", region: "Carpathians", seasons: ["winter"], hubs: ["VIE", "BUD"], lat: 48.955, lng: 19.586, altitude: 1900, transferMinutes: [240, 210], searchTerms: ["Jasná Low Tatras snow conditions ski"], defaultCosts: { accommodationPerNight: 45, activityCostPerDay: 38, clubMedPerNight: 175, clubMedActivityIncluded: true } },
-  w16: { name: "Åre", country: "SE", region: "Scandinavia", seasons: ["winter"], hubs: ["ARN", "OSL"], lat: 63.399, lng: 13.080, altitude: 1274, transferMinutes: [360, 420], searchTerms: ["Åre Sweden snow conditions ski report"], defaultCosts: { accommodationPerNight: 110, activityCostPerDay: 58, clubMedPerNight: 0, clubMedActivityIncluded: false } },
-  w17: { name: "Hintertux", country: "AT", region: "Alps", seasons: ["winter"], hubs: ["INN", "MUC"], lat: 47.060, lng: 11.660, altitude: 3250, transferMinutes: [90, 150], searchTerms: ["Hintertux glacier ski conditions snow"], defaultCosts: { accommodationPerNight: 100, activityCostPerDay: 58, clubMedPerNight: 0, clubMedActivityIncluded: false } },
+  w1:  { name: "Val Thorens", country: "FR", region: "Alps", seasons: ["winter"], hubs: ["LYS", "GVA"], lat: 45.298, lng: 6.580, altitude: 2300, transferMinutes: [150, 180],
+    conditionSearchQueries: ["Val Thorens snow report today conditions", "Val Thorens enneigement bulletin neige"],
+    pricingSearchQueries: ["Val Thorens ski pass price 2025 daily tarif forfait", "Val Thorens hotel apartment price per night March"],
+    sentimentSearchTerms: ["Val Thorens snow conditions review this week"],
+    defaultCosts: { accommodationPerNight: 95, activityCostPerDay: 72, clubMedPerNight: 285, clubMedActivityIncluded: true } },
+
+  w2:  { name: "Innsbruck (Nordkette)", country: "AT", region: "Alps", seasons: ["winter"], hubs: ["INN", "MUC"], lat: 47.260, lng: 11.394, altitude: 1800, transferMinutes: [15, 120],
+    conditionSearchQueries: ["Innsbruck Nordkette Schneebericht snow report today", "Nordkette ski conditions current"],
+    pricingSearchQueries: ["Nordkette ski pass price 2025 Tageskarte", "Innsbruck hotel price per night"],
+    sentimentSearchTerms: ["Innsbruck Nordkette ski conditions review"],
+    defaultCosts: { accommodationPerNight: 85, activityCostPerDay: 56, clubMedPerNight: 260, clubMedActivityIncluded: true } },
+
+  w3:  { name: "Chamonix", country: "FR", region: "Alps", seasons: ["winter"], hubs: ["GVA", "LYS"], lat: 45.924, lng: 6.870, altitude: 2400, transferMinutes: [80, 180],
+    conditionSearchQueries: ["Chamonix snow report today bulletin neige", "Chamonix Mont Blanc ski conditions avalanche"],
+    pricingSearchQueries: ["Chamonix Mont Blanc ski pass price 2025 forfait journée", "Chamonix accommodation price per night March"],
+    sentimentSearchTerms: ["Chamonix snow conditions avalanche report review"],
+    defaultCosts: { accommodationPerNight: 115, activityCostPerDay: 68, clubMedPerNight: 310, clubMedActivityIncluded: true } },
+
+  w4:  { name: "Zermatt", country: "CH", region: "Alps", seasons: ["winter"], hubs: ["ZRH", "GVA"], lat: 46.020, lng: 7.749, altitude: 2600, transferMinutes: [210, 240],
+    conditionSearchQueries: ["Zermatt snow report today Schneebericht", "Zermatt Matterhorn glacier paradise conditions"],
+    pricingSearchQueries: ["Zermatt ski pass price 2025 Tageskarte CHF EUR", "Zermatt hotel apartment price per night"],
+    sentimentSearchTerms: ["Zermatt ski conditions piste review"],
+    defaultCosts: { accommodationPerNight: 170, activityCostPerDay: 85, clubMedPerNight: 380, clubMedActivityIncluded: true } },
+
+  w5:  { name: "St. Anton", country: "AT", region: "Alps", seasons: ["winter"], hubs: ["INN", "ZRH"], lat: 47.128, lng: 10.268, altitude: 1800, transferMinutes: [75, 150],
+    conditionSearchQueries: ["St Anton am Arlberg snow report today Schneebericht", "St Anton ski conditions current"],
+    pricingSearchQueries: ["St Anton Arlberg ski pass price 2025 Tageskarte", "St Anton hotel apartment price per night"],
+    sentimentSearchTerms: ["St Anton am Arlberg snow conditions review"],
+    defaultCosts: { accommodationPerNight: 95, activityCostPerDay: 62, clubMedPerNight: 270, clubMedActivityIncluded: true } },
+
+  w6:  { name: "Bansko", country: "BG", region: "Balkans", seasons: ["winter"], hubs: ["SOF"], lat: 41.838, lng: 23.489, altitude: 1400, transferMinutes: [150],
+    conditionSearchQueries: ["Bansko snow report today conditions Bulgaria", "Bansko ski conditions current snow depth"],
+    pricingSearchQueries: ["Bansko ski pass price 2025 daily lift ticket", "Bansko hotel apartment price per night March"],
+    sentimentSearchTerms: ["Bansko ski conditions review Bulgaria"],
+    defaultCosts: { accommodationPerNight: 35, activityCostPerDay: 35, clubMedPerNight: 155, clubMedActivityIncluded: true } },
+
+  w7:  { name: "Livigno", country: "IT", region: "Alps", seasons: ["winter"], hubs: ["MXP", "INN"], lat: 46.538, lng: 10.136, altitude: 1800, transferMinutes: [210, 180],
+    conditionSearchQueries: ["Livigno snow report today bollettino neve", "Livigno ski conditions snowpark current"],
+    pricingSearchQueries: ["Livigno skipass price 2025 giornaliero", "Livigno hotel apartment price per night"],
+    sentimentSearchTerms: ["Livigno snow conditions snowpark review"],
+    defaultCosts: { accommodationPerNight: 75, activityCostPerDay: 48, clubMedPerNight: 220, clubMedActivityIncluded: true } },
+
+  w8:  { name: "Gudauri", country: "GE", region: "Caucasus", seasons: ["winter"], hubs: ["TBS"], lat: 42.458, lng: 44.470, altitude: 2200, transferMinutes: [120],
+    conditionSearchQueries: ["Gudauri snow report today conditions Georgia", "Gudauri ski conditions freeride current"],
+    pricingSearchQueries: ["Gudauri ski pass price 2025 lift ticket GEL EUR", "Gudauri hotel guesthouse price per night"],
+    sentimentSearchTerms: ["Gudauri snow conditions freeride report review"],
+    defaultCosts: { accommodationPerNight: 40, activityCostPerDay: 20, clubMedPerNight: 0, clubMedActivityIncluded: false } },
+
+  w9:  { name: "Verbier", country: "CH", region: "Alps", seasons: ["winter"], hubs: ["GVA", "ZRH"], lat: 46.096, lng: 7.228, altitude: 2200, transferMinutes: [120, 180],
+    conditionSearchQueries: ["Verbier snow report today bulletin neige", "Verbier 4 Vallées ski conditions current"],
+    pricingSearchQueries: ["Verbier ski pass price 2025 4 Vallées forfait journée CHF", "Verbier hotel apartment price per night"],
+    sentimentSearchTerms: ["Verbier snow conditions Mont Fort review"],
+    defaultCosts: { accommodationPerNight: 185, activityCostPerDay: 78, clubMedPerNight: 395, clubMedActivityIncluded: true } },
+
+  w10: { name: "Grandvalira (Soldeu)", country: "AD", region: "Pyrenees", seasons: ["winter"], hubs: ["BCN", "TLS"], lat: 42.576, lng: 1.668, altitude: 1710, transferMinutes: [180, 150],
+    conditionSearchQueries: ["Grandvalira Soldeu snow report today Andorra", "Grandvalira ski conditions current snow depth"],
+    pricingSearchQueries: ["Grandvalira ski pass price 2025 forfait journée", "Soldeu Andorra hotel apartment price per night"],
+    sentimentSearchTerms: ["Grandvalira Soldeu Andorra snow conditions review"],
+    defaultCosts: { accommodationPerNight: 70, activityCostPerDay: 52, clubMedPerNight: 235, clubMedActivityIncluded: true } },
+
+  w11: { name: "Tignes", country: "FR", region: "Alps", seasons: ["winter"], hubs: ["LYS", "GVA"], lat: 45.468, lng: 6.907, altitude: 2100, transferMinutes: [150, 180],
+    conditionSearchQueries: ["Tignes snow report today bulletin neige Espace Killy", "Tignes ski conditions current"],
+    pricingSearchQueries: ["Tignes ski pass price 2025 Espace Killy forfait journée", "Tignes hotel apartment price per night March"],
+    sentimentSearchTerms: ["Tignes Espace Killy snow conditions review"],
+    defaultCosts: { accommodationPerNight: 90, activityCostPerDay: 68, clubMedPerNight: 290, clubMedActivityIncluded: true } },
+
+  w12: { name: "Kitzbühel", country: "AT", region: "Alps", seasons: ["winter"], hubs: ["SZG", "MUC", "INN"], lat: 47.449, lng: 12.392, altitude: 1600, transferMinutes: [80, 120, 100],
+    conditionSearchQueries: ["Kitzbühel snow report today Schneebericht", "Kitzbühel ski conditions current snow depth"],
+    pricingSearchQueries: ["Kitzbühel ski pass price 2025 Tageskarte", "Kitzbühel hotel apartment price per night"],
+    sentimentSearchTerms: ["Kitzbühel snow report ski conditions review"],
+    defaultCosts: { accommodationPerNight: 110, activityCostPerDay: 60, clubMedPerNight: 275, clubMedActivityIncluded: true } },
+
+  w13: { name: "Borovets", country: "BG", region: "Balkans", seasons: ["winter"], hubs: ["SOF"], lat: 42.265, lng: 23.608, altitude: 1300, transferMinutes: [75],
+    conditionSearchQueries: ["Borovets snow report today conditions Bulgaria", "Borovets ski conditions current"],
+    pricingSearchQueries: ["Borovets ski pass price 2025 lift ticket", "Borovets hotel price per night"],
+    sentimentSearchTerms: ["Borovets snow conditions Bulgaria ski review"],
+    defaultCosts: { accommodationPerNight: 30, activityCostPerDay: 28, clubMedPerNight: 140, clubMedActivityIncluded: true } },
+
+  w14: { name: "Cervinia", country: "IT", region: "Alps", seasons: ["winter"], hubs: ["TRN", "MXP"], lat: 45.934, lng: 7.631, altitude: 2500, transferMinutes: [120, 150],
+    conditionSearchQueries: ["Cervinia snow report today bollettino neve", "Cervinia Plateau Rosa ski conditions current"],
+    pricingSearchQueries: ["Cervinia skipass price 2025 giornaliero", "Cervinia hotel apartment price per night"],
+    sentimentSearchTerms: ["Cervinia snow conditions Plateau Rosa review"],
+    defaultCosts: { accommodationPerNight: 90, activityCostPerDay: 62, clubMedPerNight: 265, clubMedActivityIncluded: true } },
+
+  w15: { name: "Jasná", country: "SK", region: "Carpathians", seasons: ["winter"], hubs: ["VIE", "BUD"], lat: 48.955, lng: 19.586, altitude: 1900, transferMinutes: [240, 210],
+    conditionSearchQueries: ["Jasná Low Tatras snow report today conditions", "Jasná ski conditions current snow depth"],
+    pricingSearchQueries: ["Jasná ski pass price 2025 skipass denný", "Jasná hotel apartment price per night"],
+    sentimentSearchTerms: ["Jasná Low Tatras snow conditions ski review"],
+    defaultCosts: { accommodationPerNight: 45, activityCostPerDay: 38, clubMedPerNight: 175, clubMedActivityIncluded: true } },
+
+  w16: { name: "Åre", country: "SE", region: "Scandinavia", seasons: ["winter"], hubs: ["ARN", "OSL"], lat: 63.399, lng: 13.080, altitude: 1274, transferMinutes: [360, 420],
+    conditionSearchQueries: ["Åre Sweden snow report today snörapport", "Åre ski conditions current"],
+    pricingSearchQueries: ["Åre ski pass price 2025 dagspass SEK", "Åre hotel apartment price per night"],
+    sentimentSearchTerms: ["Åre Sweden snow conditions ski review"],
+    defaultCosts: { accommodationPerNight: 110, activityCostPerDay: 58, clubMedPerNight: 0, clubMedActivityIncluded: false } },
+
+  w17: { name: "Hintertux", country: "AT", region: "Alps", seasons: ["winter"], hubs: ["INN", "MUC"], lat: 47.060, lng: 11.660, altitude: 3250, transferMinutes: [90, 150],
+    conditionSearchQueries: ["Hintertux glacier snow report today Schneebericht", "Hintertux Gletscher ski conditions current"],
+    pricingSearchQueries: ["Hintertux glacier ski pass price 2025 Tageskarte", "Hintertux hotel apartment price per night"],
+    sentimentSearchTerms: ["Hintertux glacier ski conditions snow review"],
+    defaultCosts: { accommodationPerNight: 100, activityCostPerDay: 58, clubMedPerNight: 0, clubMedActivityIncluded: false } },
 
   // ─── SUMMER ───
-  s1:  { name: "Peniche", country: "PT", region: "Atlantic Coast", seasons: ["summer"], hubs: ["LIS"], lat: 39.356, lng: -9.381, transferMinutes: [75], searchTerms: ["Peniche surf conditions Supertubos"], safeMonths: [4,5,6,7,8,9,10], defaultCosts: { accommodationPerNight: 55, activityCostPerDay: 35, clubMedPerNight: 195, clubMedActivityIncluded: true, carRentalPerDay: 25 } },
-  s2:  { name: "Tarifa", country: "ES", region: "Mediterranean", seasons: ["summer"], hubs: ["AGP", "SVQ"], lat: 36.014, lng: -5.604, transferMinutes: [120, 150], searchTerms: ["Tarifa kitesurf wind conditions"], safeMonths: [4,5,6,7,8,9,10], defaultCosts: { accommodationPerNight: 65, activityCostPerDay: 45, clubMedPerNight: 220, clubMedActivityIncluded: true, carRentalPerDay: 30 } },
-  s3:  { name: "Dahab", country: "EG", region: "Red Sea", seasons: ["summer"], hubs: ["SSH"], lat: 28.500, lng: 34.513, transferMinutes: [60], searchTerms: ["Dahab wind kitesurf diving conditions"], safeMonths: [1,2,3,4,5,6,9,10,11,12], defaultCosts: { accommodationPerNight: 25, activityCostPerDay: 20, clubMedPerNight: 0, clubMedActivityIncluded: false, carRentalPerDay: 15 } },
-  s4:  { name: "Essaouira", country: "MA", region: "Atlantic Coast", seasons: ["summer"], hubs: ["ESS", "RAK"], lat: 31.513, lng: -9.770, transferMinutes: [15, 150], searchTerms: ["Essaouira wind surf conditions"], safeMonths: [3,4,5,6,7,8,9,10,11], defaultCosts: { accommodationPerNight: 35, activityCostPerDay: 25, clubMedPerNight: 165, clubMedActivityIncluded: true, carRentalPerDay: 20 } },
-  s5:  { name: "Biarritz", country: "FR", region: "Atlantic Coast", seasons: ["summer"], hubs: ["BIQ", "BOD"], lat: 43.483, lng: -1.558, transferMinutes: [5, 120], searchTerms: ["Biarritz surf conditions Grande Plage"], safeMonths: [5,6,7,8,9,10], defaultCosts: { accommodationPerNight: 100, activityCostPerDay: 40, clubMedPerNight: 275, clubMedActivityIncluded: true, carRentalPerDay: 35 } },
-  s6:  { name: "Ericeira", country: "PT", region: "Atlantic Coast", seasons: ["summer"], hubs: ["LIS"], lat: 38.963, lng: -9.415, transferMinutes: [50], searchTerms: ["Ericeira surf conditions WSR waves"], safeMonths: [4,5,6,7,8,9,10], defaultCosts: { accommodationPerNight: 60, activityCostPerDay: 30, clubMedPerNight: 210, clubMedActivityIncluded: true, carRentalPerDay: 22 } },
-  s7:  { name: "Fuerteventura", country: "ES", region: "Canary Islands", seasons: ["summer"], hubs: ["FUE"], lat: 28.359, lng: -14.053, transferMinutes: [20], searchTerms: ["Fuerteventura surf wind conditions"], safeMonths: [1,2,3,4,5,6,7,8,9,10,11,12], defaultCosts: { accommodationPerNight: 55, activityCostPerDay: 30, clubMedPerNight: 190, clubMedActivityIncluded: true, carRentalPerDay: 20 } },
-  s8:  { name: "Zanzibar", country: "TZ", region: "Indian Ocean", seasons: ["summer"], hubs: ["ZNZ", "DAR"], lat: -6.165, lng: 39.202, transferMinutes: [20, 90], searchTerms: ["Zanzibar kitesurf conditions Paje beach"], safeMonths: [6,7,8,9,10,1,2], defaultCosts: { accommodationPerNight: 45, activityCostPerDay: 35, clubMedPerNight: 250, clubMedActivityIncluded: true, carRentalPerDay: 18 } },
-  s9:  { name: "Hossegor", country: "FR", region: "Atlantic Coast", seasons: ["summer"], hubs: ["BIQ", "BOD"], lat: 43.664, lng: -1.441, transferMinutes: [25, 120], searchTerms: ["Hossegor surf conditions La Gravière"], safeMonths: [5,6,7,8,9,10], defaultCosts: { accommodationPerNight: 85, activityCostPerDay: 35, clubMedPerNight: 260, clubMedActivityIncluded: true, carRentalPerDay: 30 } },
-  s10: { name: "Sagres", country: "PT", region: "Atlantic Coast", seasons: ["summer"], hubs: ["FAO"], lat: 37.009, lng: -8.940, transferMinutes: [75], searchTerms: ["Sagres surf conditions Algarve"], safeMonths: [4,5,6,7,8,9,10], defaultCosts: { accommodationPerNight: 55, activityCostPerDay: 28, clubMedPerNight: 185, clubMedActivityIncluded: true, carRentalPerDay: 22 } },
-  s11: { name: "Taghazout", country: "MA", region: "Atlantic Coast", seasons: ["summer"], hubs: ["AGA"], lat: 30.545, lng: -9.714, transferMinutes: [30], searchTerms: ["Taghazout surf conditions Anchor Point"], safeMonths: [1,2,3,4,5,9,10,11,12], defaultCosts: { accommodationPerNight: 30, activityCostPerDay: 22, clubMedPerNight: 155, clubMedActivityIncluded: true, carRentalPerDay: 15 } },
-  s12: { name: "Crete", country: "GR", region: "Mediterranean", seasons: ["summer"], hubs: ["HER"], lat: 35.240, lng: 24.470, transferMinutes: [30], searchTerms: ["Crete beach conditions weather hiking"], safeMonths: [4,5,6,7,8,9,10], defaultCosts: { accommodationPerNight: 65, activityCostPerDay: 25, clubMedPerNight: 230, clubMedActivityIncluded: true, carRentalPerDay: 25 } },
-  s13: { name: "Sardinia", country: "IT", region: "Mediterranean", seasons: ["summer"], hubs: ["CAG", "OLB"], lat: 39.224, lng: 9.122, transferMinutes: [30, 45], searchTerms: ["Sardinia windsurf conditions beach"], safeMonths: [5,6,7,8,9,10], defaultCosts: { accommodationPerNight: 80, activityCostPerDay: 35, clubMedPerNight: 245, clubMedActivityIncluded: true, carRentalPerDay: 28 } },
-  s14: { name: "Lanzarote", country: "ES", region: "Canary Islands", seasons: ["summer"], hubs: ["ACE"], lat: 29.036, lng: -13.630, transferMinutes: [15], searchTerms: ["Lanzarote surf conditions Famara"], safeMonths: [1,2,3,4,5,6,7,8,9,10,11,12], defaultCosts: { accommodationPerNight: 60, activityCostPerDay: 30, clubMedPerNight: 200, clubMedActivityIncluded: true, carRentalPerDay: 20 } },
-  s15: { name: "Split", country: "HR", region: "Mediterranean", seasons: ["summer"], hubs: ["SPU", "ZAG"], lat: 43.508, lng: 16.440, transferMinutes: [20, 240], searchTerms: ["Split Croatia sea conditions summer"], safeMonths: [5,6,7,8,9,10], defaultCosts: { accommodationPerNight: 60, activityCostPerDay: 30, clubMedPerNight: 210, clubMedActivityIncluded: true, carRentalPerDay: 25 } },
+  s1:  { name: "Peniche", country: "PT", region: "Atlantic Coast", seasons: ["summer"], hubs: ["LIS"], lat: 39.356, lng: -9.381, transferMinutes: [75],
+    conditionSearchQueries: ["Peniche surf report today Supertubos", "Peniche Portugal weather conditions today"],
+    pricingSearchQueries: ["Peniche surf rental price per day board wetsuit", "Peniche Portugal accommodation price per night"],
+    sentimentSearchTerms: ["Peniche surf conditions Supertubos review"],
+    safeMonths: [4,5,6,7,8,9,10], defaultCosts: { accommodationPerNight: 55, activityCostPerDay: 35, clubMedPerNight: 195, clubMedActivityIncluded: true, carRentalPerDay: 25 } },
+  s2:  { name: "Tarifa", country: "ES", region: "Mediterranean", seasons: ["summer"], hubs: ["AGP", "SVQ"], lat: 36.014, lng: -5.604, transferMinutes: [120, 150],
+    conditionSearchQueries: ["Tarifa wind report today kitesurf conditions", "Tarifa Spain weather today"],
+    pricingSearchQueries: ["Tarifa kitesurf rental price per day equipment", "Tarifa hotel apartment price per night"],
+    sentimentSearchTerms: ["Tarifa kitesurf wind conditions review"],
+    safeMonths: [4,5,6,7,8,9,10], defaultCosts: { accommodationPerNight: 65, activityCostPerDay: 45, clubMedPerNight: 220, clubMedActivityIncluded: true, carRentalPerDay: 30 } },
+  s3:  { name: "Dahab", country: "EG", region: "Red Sea", seasons: ["summer"], hubs: ["SSH"], lat: 28.500, lng: 34.513, transferMinutes: [60],
+    conditionSearchQueries: ["Dahab wind conditions today kitesurf diving", "Dahab Egypt weather today"],
+    pricingSearchQueries: ["Dahab kitesurf rental price per day", "Dahab hotel price per night"],
+    sentimentSearchTerms: ["Dahab wind kitesurf diving conditions review"],
+    safeMonths: [1,2,3,4,5,6,9,10,11,12], defaultCosts: { accommodationPerNight: 25, activityCostPerDay: 20, clubMedPerNight: 0, clubMedActivityIncluded: false, carRentalPerDay: 15 } },
+  s4:  { name: "Essaouira", country: "MA", region: "Atlantic Coast", seasons: ["summer"], hubs: ["ESS", "RAK"], lat: 31.513, lng: -9.770, transferMinutes: [15, 150],
+    conditionSearchQueries: ["Essaouira wind surf conditions today", "Essaouira Morocco weather today"],
+    pricingSearchQueries: ["Essaouira windsurf rental price per day", "Essaouira hotel riad price per night"],
+    sentimentSearchTerms: ["Essaouira wind surf conditions review"],
+    safeMonths: [3,4,5,6,7,8,9,10,11], defaultCosts: { accommodationPerNight: 35, activityCostPerDay: 25, clubMedPerNight: 165, clubMedActivityIncluded: true, carRentalPerDay: 20 } },
+  s5:  { name: "Biarritz", country: "FR", region: "Atlantic Coast", seasons: ["summer"], hubs: ["BIQ", "BOD"], lat: 43.483, lng: -1.558, transferMinutes: [5, 120],
+    conditionSearchQueries: ["Biarritz surf report today Grande Plage", "Biarritz France weather conditions today"],
+    pricingSearchQueries: ["Biarritz surf lesson rental price per day", "Biarritz hotel price per night"],
+    sentimentSearchTerms: ["Biarritz surf conditions Grande Plage review"],
+    safeMonths: [5,6,7,8,9,10], defaultCosts: { accommodationPerNight: 100, activityCostPerDay: 40, clubMedPerNight: 275, clubMedActivityIncluded: true, carRentalPerDay: 35 } },
+  s6:  { name: "Ericeira", country: "PT", region: "Atlantic Coast", seasons: ["summer"], hubs: ["LIS"], lat: 38.963, lng: -9.415, transferMinutes: [50],
+    conditionSearchQueries: ["Ericeira surf report today conditions", "Ericeira Portugal weather today"],
+    pricingSearchQueries: ["Ericeira surf rental price per day board", "Ericeira accommodation price per night"],
+    sentimentSearchTerms: ["Ericeira surf conditions WSR review"],
+    safeMonths: [4,5,6,7,8,9,10], defaultCosts: { accommodationPerNight: 60, activityCostPerDay: 30, clubMedPerNight: 210, clubMedActivityIncluded: true, carRentalPerDay: 22 } },
+  s7:  { name: "Fuerteventura", country: "ES", region: "Canary Islands", seasons: ["summer"], hubs: ["FUE"], lat: 28.359, lng: -14.053, transferMinutes: [20],
+    conditionSearchQueries: ["Fuerteventura surf wind report today", "Fuerteventura weather conditions today"],
+    pricingSearchQueries: ["Fuerteventura surf rental price per day", "Fuerteventura hotel price per night"],
+    sentimentSearchTerms: ["Fuerteventura surf wind conditions review"],
+    safeMonths: [1,2,3,4,5,6,7,8,9,10,11,12], defaultCosts: { accommodationPerNight: 55, activityCostPerDay: 30, clubMedPerNight: 190, clubMedActivityIncluded: true, carRentalPerDay: 20 } },
+  s8:  { name: "Zanzibar", country: "TZ", region: "Indian Ocean", seasons: ["summer"], hubs: ["ZNZ", "DAR"], lat: -6.165, lng: 39.202, transferMinutes: [20, 90],
+    conditionSearchQueries: ["Zanzibar kitesurf conditions Paje today", "Zanzibar weather today"],
+    pricingSearchQueries: ["Zanzibar Paje kitesurf rental price per day", "Zanzibar hotel price per night"],
+    sentimentSearchTerms: ["Zanzibar kitesurf conditions Paje beach review"],
+    safeMonths: [6,7,8,9,10,1,2], defaultCosts: { accommodationPerNight: 45, activityCostPerDay: 35, clubMedPerNight: 250, clubMedActivityIncluded: true, carRentalPerDay: 18 } },
+  s9:  { name: "Hossegor", country: "FR", region: "Atlantic Coast", seasons: ["summer"], hubs: ["BIQ", "BOD"], lat: 43.664, lng: -1.441, transferMinutes: [25, 120],
+    conditionSearchQueries: ["Hossegor surf report today La Gravière", "Hossegor weather conditions today"],
+    pricingSearchQueries: ["Hossegor surf rental price per day", "Hossegor hotel price per night"],
+    sentimentSearchTerms: ["Hossegor surf conditions La Gravière review"],
+    safeMonths: [5,6,7,8,9,10], defaultCosts: { accommodationPerNight: 85, activityCostPerDay: 35, clubMedPerNight: 260, clubMedActivityIncluded: true, carRentalPerDay: 30 } },
+  s10: { name: "Sagres", country: "PT", region: "Atlantic Coast", seasons: ["summer"], hubs: ["FAO"], lat: 37.009, lng: -8.940, transferMinutes: [75],
+    conditionSearchQueries: ["Sagres surf report today Algarve", "Sagres Portugal weather today"],
+    pricingSearchQueries: ["Sagres surf rental price per day", "Sagres hotel price per night"],
+    sentimentSearchTerms: ["Sagres surf conditions Algarve review"],
+    safeMonths: [4,5,6,7,8,9,10], defaultCosts: { accommodationPerNight: 55, activityCostPerDay: 28, clubMedPerNight: 185, clubMedActivityIncluded: true, carRentalPerDay: 22 } },
+  s11: { name: "Taghazout", country: "MA", region: "Atlantic Coast", seasons: ["summer"], hubs: ["AGA"], lat: 30.545, lng: -9.714, transferMinutes: [30],
+    conditionSearchQueries: ["Taghazout surf report today Anchor Point", "Taghazout Morocco weather today"],
+    pricingSearchQueries: ["Taghazout surf rental price per day", "Taghazout hotel riad price per night"],
+    sentimentSearchTerms: ["Taghazout surf conditions Anchor Point review"],
+    safeMonths: [1,2,3,4,5,9,10,11,12], defaultCosts: { accommodationPerNight: 30, activityCostPerDay: 22, clubMedPerNight: 155, clubMedActivityIncluded: true, carRentalPerDay: 15 } },
+  s12: { name: "Crete", country: "GR", region: "Mediterranean", seasons: ["summer"], hubs: ["HER"], lat: 35.240, lng: 24.470, transferMinutes: [30],
+    conditionSearchQueries: ["Crete beach weather conditions today", "Crete Greece sea temperature today"],
+    pricingSearchQueries: ["Crete water sports rental price per day", "Crete hotel price per night"],
+    sentimentSearchTerms: ["Crete beach conditions weather hiking review"],
+    safeMonths: [4,5,6,7,8,9,10], defaultCosts: { accommodationPerNight: 65, activityCostPerDay: 25, clubMedPerNight: 230, clubMedActivityIncluded: true, carRentalPerDay: 25 } },
+  s13: { name: "Sardinia", country: "IT", region: "Mediterranean", seasons: ["summer"], hubs: ["CAG", "OLB"], lat: 39.224, lng: 9.122, transferMinutes: [30, 45],
+    conditionSearchQueries: ["Sardinia windsurf conditions today", "Sardinia weather today sea conditions"],
+    pricingSearchQueries: ["Sardinia windsurf rental price per day", "Sardinia hotel price per night"],
+    sentimentSearchTerms: ["Sardinia windsurf conditions beach review"],
+    safeMonths: [5,6,7,8,9,10], defaultCosts: { accommodationPerNight: 80, activityCostPerDay: 35, clubMedPerNight: 245, clubMedActivityIncluded: true, carRentalPerDay: 28 } },
+  s14: { name: "Lanzarote", country: "ES", region: "Canary Islands", seasons: ["summer"], hubs: ["ACE"], lat: 29.036, lng: -13.630, transferMinutes: [15],
+    conditionSearchQueries: ["Lanzarote surf report today Famara", "Lanzarote weather conditions today"],
+    pricingSearchQueries: ["Lanzarote surf rental price per day Famara", "Lanzarote hotel price per night"],
+    sentimentSearchTerms: ["Lanzarote surf conditions Famara review"],
+    safeMonths: [1,2,3,4,5,6,7,8,9,10,11,12], defaultCosts: { accommodationPerNight: 60, activityCostPerDay: 30, clubMedPerNight: 200, clubMedActivityIncluded: true, carRentalPerDay: 20 } },
+  s15: { name: "Split", country: "HR", region: "Mediterranean", seasons: ["summer"], hubs: ["SPU", "ZAG"], lat: 43.508, lng: 16.440, transferMinutes: [20, 240],
+    conditionSearchQueries: ["Split Croatia sea conditions today", "Split weather today"],
+    pricingSearchQueries: ["Split Croatia water sports rental price", "Split hotel price per night"],
+    sentimentSearchTerms: ["Split Croatia sea conditions summer review"],
+    safeMonths: [5,6,7,8,9,10], defaultCosts: { accommodationPerNight: 60, activityCostPerDay: 30, clubMedPerNight: 210, clubMedActivityIncluded: true, carRentalPerDay: 25 } },
 };
 
 // ─── Effective Activity Days Calculator ───
-// Given flight arrival time at destination and departure time from destination,
-// plus transfer time, calculate how many full activity days the traveler gets.
 function calcEffectiveActivityDays(
   totalDays: number,
-  outboundArrivalHour: number, // 0-23 local time at destination
-  returnDepartureHour: number, // 0-23 local time at destination
+  outboundArrivalHour: number,
+  returnDepartureHour: number,
   transferMinutes: number
 ): number {
   const transferHours = transferMinutes / 60;
-  
-  // Arrival day: can they do anything?
-  // If they arrive + transfer by 14:00, they get a half day (doesn't count as full)
-  // If they arrive + transfer by 10:00, count as full activity day
   const arrivalAtResort = outboundArrivalHour + transferHours;
   let arrivalDayValue = 0;
   if (arrivalAtResort <= 10) arrivalDayValue = 1;
   else if (arrivalAtResort <= 14) arrivalDayValue = 0.5;
-  // else 0 — too late to do anything
 
-  // Departure day: need to leave resort transferHours before flight
-  // Plus 2h for airport buffer
   const leaveResortHour = returnDepartureHour - transferHours - 2;
   let departureDayValue = 0;
-  if (leaveResortHour >= 14) departureDayValue = 0.5;
-  // If they can stay until after 16:00, count as almost full day
   if (leaveResortHour >= 16) departureDayValue = 1;
-  // If leaving before 14:00, no activity on departure day
+  else if (leaveResortHour >= 14) departureDayValue = 0.5;
 
-  // Full days in between (excluding arrival and departure days)
   const middleDays = Math.max(0, totalDays - 2);
-  
   return Math.round(middleDays + arrivalDayValue + departureDayValue);
 }
 
-// ─── LLM: Get ALL conditions + costs in one call ───
-async function enrichAllWithLLM(
-  destinations: { id: string; name: string; country: string; mode: string; altitude?: number }[]
-): Promise<Record<string, { conditions: any; costs: any }>> {
+// ─── Firecrawl: Scrape REAL data from the web ───
+async function firecrawlSearch(query: string, fcKey: string, limit = 3): Promise<{ url: string; title: string; description: string; markdown?: string }[]> {
+  try {
+    const res = await fetch("https://api.firecrawl.dev/v1/search", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${fcKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query,
+        limit,
+        scrapeOptions: { formats: ["markdown"], onlyMainContent: true },
+      }),
+    });
+    if (!res.ok) { await res.text(); return []; }
+    const data = await res.json();
+    return (data?.data || []).map((r: any) => ({
+      url: r.url || "",
+      title: r.title || "",
+      description: r.description || "",
+      markdown: r.markdown?.slice(0, 2000) || "", // cap per result
+    }));
+  } catch (e) { console.error("Firecrawl search error:", e); return []; }
+}
+
+// ─── Grounded Data Enrichment: Firecrawl → LLM extraction ───
+// Instead of asking LLM to hallucinate data, we:
+// 1. Search the web for REAL current data via Firecrawl
+// 2. Feed the real scraped content to LLM for STRUCTURED EXTRACTION only
+async function enrichWithGroundedData(
+  destinations: { id: string; name: string; country: string; mode: string; altitude?: number;
+    conditionQueries: string[]; pricingQueries: string[] }[]
+): Promise<Record<string, { conditions: any; costs: any; conditionSources: string[]; pricingSources: string[] }>> {
+  const fcKey = Deno.env.get("FIRECRAWL_API_KEY");
   const aiKey = Deno.env.get("LOVABLE_API_KEY");
-  if (!aiKey) { console.warn("No LOVABLE_API_KEY"); return {}; }
+  if (!fcKey || !aiKey) {
+    console.warn("Missing FIRECRAWL_API_KEY or LOVABLE_API_KEY for grounded enrichment");
+    return {};
+  }
 
   const isWinter = destinations[0]?.mode === "winter";
   const today = new Date().toISOString().split("T")[0];
 
-  const destList = destinations.map(d => 
-    `- ${d.id}: ${d.name}, ${d.country}${d.altitude ? ` (${d.altitude}m)` : ""}`
-  ).join("\n");
+  // Step 1: Batch Firecrawl searches — conditions + pricing for each destination
+  // Process in batches of 4 to avoid rate limits
+  const scrapedData: Record<string, { conditionResults: any[]; pricingResults: any[]; conditionSources: string[]; pricingSources: string[] }> = {};
+
+  for (let i = 0; i < destinations.length; i += 4) {
+    const batch = destinations.slice(i, i + 4);
+    const promises = batch.flatMap(d => [
+      firecrawlSearch(d.conditionQueries[0], fcKey, 2).then(results => ({ id: d.id, type: "conditions" as const, results })),
+      firecrawlSearch(d.pricingQueries[0], fcKey, 2).then(results => ({ id: d.id, type: "pricing" as const, results })),
+    ]);
+    const batchResults = await Promise.all(promises);
+    for (const r of batchResults) {
+      if (!scrapedData[r.id]) scrapedData[r.id] = { conditionResults: [], pricingResults: [], conditionSources: [], pricingSources: [] };
+      if (r.type === "conditions") {
+        scrapedData[r.id].conditionResults = r.results;
+        scrapedData[r.id].conditionSources = r.results.map(x => new URL(x.url || "https://unknown.com").hostname.replace("www.", "")).filter(Boolean);
+      } else {
+        scrapedData[r.id].pricingResults = r.results;
+        scrapedData[r.id].pricingSources = r.results.map(x => new URL(x.url || "https://unknown.com").hostname.replace("www.", "")).filter(Boolean);
+      }
+    }
+    // Small delay between batches
+    if (i + 4 < destinations.length) await new Promise(r => setTimeout(r, 500));
+  }
+
+  console.log(`Firecrawl scraped data for ${Object.keys(scrapedData).length}/${destinations.length} destinations`);
+
+  // Step 2: Build a single LLM prompt with ALL the scraped real data
+  // The LLM's job is ONLY to extract structured data from the scraped content — NOT to make things up
+  const destPrompts = destinations.map(d => {
+    const scraped = scrapedData[d.id];
+    const conditionText = scraped?.conditionResults?.map(r =>
+      `SOURCE: ${r.url}\nTITLE: ${r.title}\nCONTENT: ${(r.markdown || r.description || "").slice(0, 1500)}`
+    ).join("\n---\n") || "NO DATA FOUND";
+
+    const pricingText = scraped?.pricingResults?.map(r =>
+      `SOURCE: ${r.url}\nTITLE: ${r.title}\nCONTENT: ${(r.markdown || r.description || "").slice(0, 1500)}`
+    ).join("\n---\n") || "NO DATA FOUND";
+
+    return `## ${d.id}: ${d.name}, ${d.country}${d.altitude ? ` (${d.altitude}m)` : ""}
+
+### Current Conditions Data:
+${conditionText}
+
+### Pricing Data:
+${pricingText}`;
+  }).join("\n\n========\n\n");
 
   const winterConditionsSchema = {
     type: "object",
     properties: {
-      snowDepthBase: { type: "number", description: "Snow depth at base in cm" },
-      snowDepthPeak: { type: "number", description: "Snow depth at peak in cm" },
-      freshSnow48h: { type: "number", description: "Fresh snow in last 48h in cm" },
-      tempC: { type: "number", description: "Current temperature at resort in Celsius" },
-      freezeLevel: { type: "number", description: "Freeze level in meters" },
-      recentStorm: { type: "boolean" },
-      liftStatus: { type: "string", enum: ["full", "partial", "closed"] },
+      snowDepthBase: { type: "number", description: "Snow depth at base in cm — EXTRACT from scraped data only" },
+      snowDepthPeak: { type: "number", description: "Snow depth at peak/summit in cm — EXTRACT from scraped data only" },
+      freshSnow48h: { type: "number", description: "Fresh snow in last 48h in cm — EXTRACT from scraped data, 0 if not mentioned" },
+      tempC: { type: "number", description: "Current temperature at resort in Celsius — EXTRACT from scraped data" },
+      freezeLevel: { type: "number", description: "Freeze level in meters — EXTRACT from scraped data, or estimate from temp + altitude" },
+      recentStorm: { type: "boolean", description: "Was there a storm recently? Based on scraped data" },
+      liftStatus: { type: "string", enum: ["full", "partial", "closed"], description: "Lift operation status — EXTRACT from scraped data" },
+      dataConfidence: { type: "string", enum: ["high", "medium", "low"], description: "How confident you are in this data based on source quality" },
     },
-    required: ["snowDepthBase", "snowDepthPeak", "freshSnow48h", "tempC", "freezeLevel", "recentStorm", "liftStatus"],
+    required: ["snowDepthBase", "snowDepthPeak", "freshSnow48h", "tempC", "freezeLevel", "recentStorm", "liftStatus", "dataConfidence"],
   };
 
   const summerConditionsSchema = {
@@ -131,29 +340,22 @@ async function enrichAllWithLLM(
       swellPeriodS: { type: "number" },
       windKnots: { type: "number" },
       uvIndex: { type: "number" },
-      sunnyDays: { type: "number", description: "Expected sunny days in next 7" },
-      rainyDays: { type: "number", description: "Expected rainy days in next 7" },
+      sunnyDays: { type: "number" },
+      rainyDays: { type: "number" },
+      dataConfidence: { type: "string", enum: ["high", "medium", "low"] },
     },
-    required: ["waterTempC", "swellHeightM", "swellPeriodS", "windKnots", "uvIndex", "sunnyDays", "rainyDays"],
+    required: ["waterTempC", "swellHeightM", "swellPeriodS", "windKnots", "uvIndex", "sunnyDays", "rainyDays", "dataConfidence"],
   };
 
-  const prompt = `Today is ${today}. You are a travel data analyst with expertise in ${isWinter ? "ski resort conditions" : "surf/water sport conditions"} and travel pricing.
+  const systemPrompt = `You are a data EXTRACTION engine. Your job is to extract structured data from the web-scraped content provided.
 
-For EACH destination below, provide CURRENT real conditions and ACCURATE 2025-2026 season pricing in EUR.
-
-Destinations:
-${destList}
-
-CRITICAL ACCURACY RULES:
-${isWinter ? `- Snow depths: Check actual current reports. Many Alpine resorts in March have 150-350cm at peak. If a resort has glacier access (Hintertux, Zermatt), snow is near-guaranteed.
-- Lift status: Most major resorts are fully operational in March. Only mark "partial" or "closed" if genuinely end-of-season.
-- Ski pass prices: Val Thorens ~€72/day, Zermatt ~€92/day, Grandvalira ~€55/day, Bansko ~€40/day, Gudauri ~€18/day. Use actual 2025 published rates.
-- Accommodation: Use mid-range apartment/hotel rates for the current period.` 
-: `- Water temperatures: Use actual seasonal averages for this time of year.
-- Swell/wind: Use typical conditions for the current month.
-- Activity costs: surf lesson/rental ~€30-50/day, kite rental ~€40-60/day.`}
-
-Return data for ALL ${destinations.length} destinations. Do not skip any.`;
+CRITICAL RULES:
+1. ONLY extract data that is explicitly stated or clearly implied in the scraped content.
+2. If no scraped data is available (marked "NO DATA FOUND"), set dataConfidence to "low" and use reasonable estimates clearly marked.
+3. For pricing: extract EXACT prices mentioned in the sources. Convert to EUR if in other currencies (CHF×1.07, GBP×1.17, SEK×0.088, BGN×0.51, GEL×0.34).
+4. Do NOT invent or hallucinate data. If a snow report says "base depth 120cm", use 120, not a round number.
+5. For ski pass daily rates: look for "journée", "Tageskarte", "giornaliero", "daily", "day pass" prices.
+6. For accommodation: look for actual nightly rates. If a range is given, use the midpoint.`;
 
   try {
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -162,14 +364,14 @@ Return data for ALL ${destinations.length} destinations. Do not skip any.`;
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are a travel data expert. Return structured data via the provided tool. Be accurate with real current data." },
-          { role: "user", content: prompt },
+          { role: "system", content: systemPrompt },
+          { role: "user", content: `Today is ${today}. Extract structured data from the following web-scraped content for each destination.\n\n${destPrompts}` },
         ],
         tools: [{
           type: "function",
           function: {
             name: "set_destination_data",
-            description: "Set conditions and costs for all destinations",
+            description: "Set extracted conditions and costs for all destinations",
             parameters: {
               type: "object",
               properties: {
@@ -178,14 +380,14 @@ Return data for ALL ${destinations.length} destinations. Do not skip any.`;
                   items: {
                     type: "object",
                     properties: {
-                      id: { type: "string", description: "Destination ID exactly as provided (e.g. w1, s3)" },
+                      id: { type: "string" },
                       conditions: isWinter ? winterConditionsSchema : summerConditionsSchema,
                       costs: {
                         type: "object",
                         properties: {
-                          accommodationPerNight: { type: "number", description: "Mid-range hotel/apartment EUR/night" },
-                          activityCostPerDay: { type: "number", description: isWinter ? "Daily ski pass EUR" : "Daily activity rental EUR" },
-                          clubMedPerNight: { type: "number", description: "Nearest Club Med all-inclusive EUR/night, 0 if none" },
+                          accommodationPerNight: { type: "number", description: "EUR/night — extract from scraped pricing data" },
+                          activityCostPerDay: { type: "number", description: isWinter ? "Daily ski pass EUR — extract from scraped data" : "Daily activity rental EUR" },
+                          clubMedPerNight: { type: "number", description: "Club Med all-inclusive EUR/night, 0 if not found" },
                           clubMedActivityIncluded: { type: "boolean" },
                           ...(isWinter ? {} : { carRentalPerDay: { type: "number" } }),
                         },
@@ -205,7 +407,7 @@ Return data for ALL ${destinations.length} destinations. Do not skip any.`;
     });
 
     if (!res.ok) {
-      console.error("LLM enrichment error:", res.status, await res.text());
+      console.error("LLM extraction error:", res.status, await res.text());
       return {};
     }
 
@@ -217,16 +419,22 @@ Return data for ALL ${destinations.length} destinations. Do not skip any.`;
     }
 
     const parsed = JSON.parse(toolCall.function.arguments);
-    const result: Record<string, { conditions: any; costs: any }> = {};
+    const result: Record<string, { conditions: any; costs: any; conditionSources: string[]; pricingSources: string[] }> = {};
     for (const d of parsed.destinations || []) {
       if (d.id && d.conditions && d.costs) {
-        result[d.id] = { conditions: d.conditions, costs: d.costs };
+        const scraped = scrapedData[d.id];
+        result[d.id] = {
+          conditions: d.conditions,
+          costs: d.costs,
+          conditionSources: scraped?.conditionSources || [],
+          pricingSources: scraped?.pricingSources || [],
+        };
       }
     }
-    console.log(`LLM enriched ${Object.keys(result).length}/${destinations.length} destinations`);
+    console.log(`LLM extracted data for ${Object.keys(result).length}/${destinations.length} destinations`);
     return result;
   } catch (e) {
-    console.error("LLM enrichment failed:", e);
+    console.error("Grounded enrichment failed:", e);
     return {};
   }
 }
@@ -282,44 +490,37 @@ async function searchFlight(token: string, hub: string, depDate: string, retDate
         airline: outSegs[0].carrierCode,
         departure: fmtT(outSegs[0].departure.at),
         arrival: fmtT(outSegs[outSegs.length - 1].arrival.at),
-        baseFare: outFare,
-        baggageIncluded: !!outBag,
+        baseFare: outFare, baggageIncluded: !!outBag,
       },
       returnLeg: {
         airline: retSegs[0].carrierCode,
         departure: fmtT(retSegs[0].departure.at),
         arrival: fmtT(retSegs[retSegs.length - 1].arrival.at),
-        baseFare: retFare,
-        baggageIncluded: !!retBag,
+        baseFare: retFare, baggageIncluded: !!retBag,
       },
       baggageFee: outBag && retBag ? 0 : 35,
       airportTransfer: 50,
-      // Metadata for travel day calc
       _arrivalHour: getHour(outSegs[outSegs.length - 1].arrival.at),
       _departureHour: getHour(retSegs[0].departure.at),
     };
   } catch (e) { console.error("Flight search error:", e); return null; }
 }
 
-// ─── Firecrawl + AI Sentiment (expanded to top 8) ───
-async function fetchSentimentBatch(dests: { id: string; name: string; mode: string; searchTerms: string[] }[]) {
+// ─── Firecrawl + AI Sentiment ───
+async function fetchSentimentBatch(dests: { id: string; name: string; mode: string; sentimentTerms: string[] }[]) {
   const fcKey = Deno.env.get("FIRECRAWL_API_KEY");
   const aiKey = Deno.env.get("LOVABLE_API_KEY");
   if (!fcKey) return {};
   const results: Record<string, any> = {};
-  const limited = dests.slice(0, 8);
-  
-  // Run searches in parallel batches of 4
-  const batch1 = limited.slice(0, 4);
-  const batch2 = limited.slice(4, 8);
-  
+  const limited = dests.slice(0, 10); // expanded from 8
+
   async function processDest(d: typeof limited[0]) {
     try {
-      const query = d.searchTerms[0];
+      const query = d.sentimentTerms[0];
       const res = await fetch("https://api.firecrawl.dev/v1/search", {
         method: "POST",
         headers: { Authorization: `Bearer ${fcKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ query, limit: 3, tbs: "qdr:m" }), // last month for more results
+        body: JSON.stringify({ query, limit: 3, tbs: "qdr:m" }),
       });
       if (!res.ok) { await res.text(); return; }
       const data = await res.json();
@@ -364,13 +565,10 @@ async function fetchSentimentBatch(dests: { id: string; name: string; mode: stri
     } catch (e) { console.error(`Sentiment error for ${d.id}:`, e); }
   }
 
-  // Process batch 1 in parallel
-  await Promise.all(batch1.map(processDest));
-  // Then batch 2
-  if (batch2.length > 0) {
-    await Promise.all(batch2.map(processDest));
+  // Process in batches of 5
+  for (let i = 0; i < limited.length; i += 5) {
+    await Promise.all(limited.slice(i, i + 5).map(processDest));
   }
-  
   return results;
 }
 
@@ -398,8 +596,7 @@ serve(async (req) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Departure date: use provided or default to tomorrow
-    // Validate it's within next 4 days
+    // Departure date validation
     const now = new Date();
     let depDateObj: Date;
     if (reqDepDate) {
@@ -423,26 +620,30 @@ serve(async (req) => {
       sortedEntries.sort((a, b) => (b[1].altitude || 0) - (a[1].altitude || 0));
     }
 
-    // ── Parallel: Flights token + LLM (conditions+costs) + Sentiment ──
-    const sentimentDests = sortedEntries.map(([id, v]) => ({ id, name: v.name, mode, searchTerms: v.searchTerms }));
-    const llmDests = sortedEntries.map(([id, v]) => ({ id, name: v.name, country: v.country, mode, altitude: v.altitude }));
+    // ── Parallel: Flights token + Grounded enrichment (Firecrawl→LLM) + Sentiment ──
+    const sentimentDests = sortedEntries.map(([id, v]) => ({
+      id, name: v.name, mode, sentimentTerms: v.sentimentSearchTerms,
+    }));
+    const enrichDests = sortedEntries.map(([id, v]) => ({
+      id, name: v.name, country: v.country, mode, altitude: v.altitude,
+      conditionQueries: v.conditionSearchQueries,
+      pricingQueries: v.pricingSearchQueries,
+    }));
 
-    const [token, llmData, sentimentData] = await Promise.all([
+    const [token, groundedData, sentimentData] = await Promise.all([
       getAmadeusToken(),
-      enrichAllWithLLM(llmDests),
+      enrichWithGroundedData(enrichDests),
       fetchSentimentBatch(sentimentDests),
     ]);
 
     // ── Flights: search ALL hubs per destination, pick cheapest total ──
     const flightsData: Record<string, any> = {};
     if (token) {
-      // Collect all unique hubs we need to search
       const allHubs = new Set<string>();
       for (const [_, reg] of sortedEntries) {
         for (const hub of reg.hubs) allHubs.add(hub);
       }
 
-      // Search each unique hub once
       const hubResults = new Map<string, any>();
       for (const hub of allHubs) {
         await new Promise(r => setTimeout(r, 120));
@@ -450,7 +651,6 @@ serve(async (req) => {
         hubResults.set(hub, result);
       }
 
-      // For each destination, compare all hub options and pick cheapest total
       for (const [id, reg] of sortedEntries) {
         let bestOption: any = null;
         let bestTotalCost = Infinity;
@@ -463,7 +663,7 @@ serve(async (req) => {
           const transferMin = reg.transferMinutes[i] || 120;
           const transferCost = Math.round(transferMin <= 60 ? 30 : transferMin <= 120 ? 50 : transferMin <= 180 ? 70 : 90);
           const flightCost = result.outbound.baseFare + result.returnLeg.baseFare;
-          const totalCost = flightCost + (transferCost * 2); // round trip transfer
+          const totalCost = flightCost + (transferCost * 2);
 
           if (totalCost < bestTotalCost) {
             bestTotalCost = totalCost;
@@ -471,22 +671,20 @@ serve(async (req) => {
           }
         }
 
-        if (bestOption) {
-          flightsData[id] = bestOption;
-        }
+        if (bestOption) flightsData[id] = bestOption;
       }
     }
 
     const liveFlags = {
       flights: !!token && Object.values(flightsData).some(v => v !== null),
-      weather: Object.keys(llmData).length > 0,
+      weather: Object.keys(groundedData).length > 0,
       sentiment: Object.keys(sentimentData).length > 0,
     };
 
     // ── Assemble Destination[] ──
     const destinations = sortedEntries.map(([id, reg]) => {
       const fl = flightsData[id];
-      const llm = llmData[id];
+      const enriched = groundedData[id];
       const st = sentimentData[id];
 
       const fallbackFlights = {
@@ -499,19 +697,19 @@ serve(async (req) => {
       const safeFlag = mode === "summer" ? isSeasonSafe(reg, "summer") : true;
 
       let conditions: any;
-      if (llm?.conditions) {
+      if (enriched?.conditions) {
         if (mode === "winter") {
-          conditions = { ...llm.conditions, altitude: reg.altitude || 1800, stormDaysAgo: llm.conditions.recentStorm ? 0 : undefined };
+          conditions = { ...enriched.conditions, altitude: reg.altitude || 1800, stormDaysAgo: enriched.conditions.recentStorm ? 0 : undefined };
         } else {
-          conditions = { ...llm.conditions, safeSeasonFlag: safeFlag };
+          conditions = { ...enriched.conditions, safeSeasonFlag: safeFlag };
         }
       } else {
         conditions = mode === "winter"
-          ? { snowDepthBase: 0, snowDepthPeak: 0, freshSnow48h: 0, tempC: 0, freezeLevel: 0, recentStorm: false, liftStatus: "full", altitude: reg.altitude || 1800 }
-          : { waterTempC: 0, swellHeightM: 0, swellPeriodS: 0, windKnots: 0, uvIndex: 0, sunnyDays: 0, rainyDays: 0, safeSeasonFlag: safeFlag };
+          ? { snowDepthBase: 0, snowDepthPeak: 0, freshSnow48h: 0, tempC: 0, freezeLevel: 0, recentStorm: false, liftStatus: "full", altitude: reg.altitude || 1800, dataConfidence: "low" }
+          : { waterTempC: 0, swellHeightM: 0, swellPeriodS: 0, windKnots: 0, uvIndex: 0, sunnyDays: 0, rainyDays: 0, safeSeasonFlag: safeFlag, dataConfidence: "low" };
       }
 
-      const costs = llm?.costs || reg.defaultCosts;
+      const costs = enriched?.costs || reg.defaultCosts;
 
       let effectiveDays = days;
       if (fl?._arrivalHour != null && fl?._departureHour != null) {
@@ -531,7 +729,9 @@ serve(async (req) => {
         flights, conditions,
         sentiment: st || fallbackSentiment,
         costs, effectiveDays,
-        _liveFlights: !!fl, _liveWeather: !!llm?.conditions, _liveSentiment: !!st, _llmCosts: !!llm?.costs,
+        _liveFlights: !!fl, _liveWeather: !!enriched?.conditions, _liveSentiment: !!st, _llmCosts: !!enriched?.costs,
+        _conditionSources: enriched?.conditionSources || [],
+        _pricingSources: enriched?.pricingSources || [],
       };
     });
 
