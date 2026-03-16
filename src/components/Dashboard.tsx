@@ -139,19 +139,19 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
                 LATE SEASON
               </span>
             )}
-            {/* Live/Mock badge */}
+            {/* Live badge */}
             {!isLoading && (
               <span className={`flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-sm border ${
-                isMock
-                  ? 'text-terminal-amber border-terminal-amber bg-terminal-amber/10'
+                isError
+                  ? 'text-terminal-red border-terminal-red bg-terminal-red/10'
                   : 'text-terminal-green border-terminal-green bg-terminal-green/10'
               }`}>
-                {isMock ? <WifiOff className="w-2.5 h-2.5" /> : <Wifi className="w-2.5 h-2.5" />}
-                {isMock ? 'MOCK' : 'LIVE'}
+                {isError ? <WifiOff className="w-2.5 h-2.5" /> : <Wifi className="w-2.5 h-2.5" />}
+                {isError ? 'OFFLINE' : 'LIVE'}
               </span>
             )}
             {/* Data source pills */}
-            {!isLoading && isLive && !isMock && (
+            {!isLoading && isLive && !isError && (
               <div className="hidden md:flex items-center gap-1">
                 {['flights', 'weather', 'sentiment'].map(src => (
                   <span key={src} className={`text-[8px] px-1 py-0.5 rounded-sm ${
