@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { TravelMode, Destination } from '@/data/types';
-import { getDestinations } from '@/data/destinations';
 
 export interface LiveFlags {
   flights: boolean;
@@ -28,8 +27,6 @@ async function fetchLiveDestinations(mode: TravelMode, days: number, departureDa
 }
 
 export function useDestinations(mode: TravelMode, days: number, departureDate?: string) {
-  const fallback = getDestinations(mode);
-
   const query = useQuery({
     queryKey: ['destinations', mode, days, departureDate],
     queryFn: () => fetchLiveDestinations(mode, days, departureDate),
@@ -39,12 +36,12 @@ export function useDestinations(mode: TravelMode, days: number, departureDate?: 
   });
 
   return {
-    destinations: query.data?.data ?? fallback,
+    destinations: query.data?.data ?? [],
     isLive: query.data?.live ?? null,
     isLoading: query.isLoading,
     isError: query.isError,
     error: query.error,
-    isMock: !query.data?.success,
+    isMock: false,
     lateSeason: query.data?.lateSeason ?? false,
   };
 }
