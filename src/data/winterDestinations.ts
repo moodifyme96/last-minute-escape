@@ -109,7 +109,7 @@ export const winterDestinations: Destination[] = [
       returnLeg: { airline: 'Wizz Air', departure: '12:30', arrival: '15:00', baseFare: 95, baggageIncluded: false },
       baggageFee: 30, airportTransfer: 65,
     },
-    conditions: { snowDepthBase: 80, snowDepthPeak: 180, freshSnow48h: 0, tempC: -3, freezeLevel: 1400, recentStorm: false, liftStatus: 'full', altitude: 1400 },
+    conditions: { snowDepthBase: 40, snowDepthPeak: 210, freshSnow48h: 0, tempC: -3, freezeLevel: 1400, recentStorm: false, liftStatus: 'full', altitude: 1400 },
     sentiment: {
       vibeScore: 62,
       summary: 'Budget king still delivers. Snow machines working overtime. Nightlife rivals après in the Alps.',
@@ -119,7 +119,7 @@ export const winterDestinations: Destination[] = [
       ],
       lastUpdated: new Date().toISOString(),
     },
-    costs: { accommodationPerNight: 35, activityCostPerDay: 35, clubMedPerNight: 155, clubMedActivityIncluded: true },
+    costs: { accommodationPerNight: 35, activityCostPerDay: 59, clubMedPerNight: 155, clubMedActivityIncluded: true },
   },
   {
     id: 'w7', name: 'Livigno', country: 'IT', region: 'Alps', mode: 'winter',
