@@ -31,7 +31,7 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
   const [hasShownLiveToast, setHasShownLiveToast] = useState(false);
 
   const depDateStr = format(departureDate, 'yyyy-MM-dd');
-  const { destinations: allDestinations, isLive, isLoading, isMock, lateSeason } = useDestinations(mode, days, depDateStr);
+  const { destinations: allDestinations, isLive, isLoading, isError, error, lateSeason } = useDestinations(mode, days, depDateStr);
 
   // Climate guardrail: filter out unsafe summer destinations
   const { filtered, removedCount } = useMemo(() => {
@@ -139,19 +139,19 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
                 LATE SEASON
               </span>
             )}
-            {/* Live/Mock badge */}
+            {/* Live badge */}
             {!isLoading && (
               <span className={`flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-sm border ${
-                isMock
-                  ? 'text-terminal-amber border-terminal-amber bg-terminal-amber/10'
+                isError
+                  ? 'text-terminal-red border-terminal-red bg-terminal-red/10'
                   : 'text-terminal-green border-terminal-green bg-terminal-green/10'
               }`}>
-                {isMock ? <WifiOff className="w-2.5 h-2.5" /> : <Wifi className="w-2.5 h-2.5" />}
-                {isMock ? 'MOCK' : 'LIVE'}
+                {isError ? <WifiOff className="w-2.5 h-2.5" /> : <Wifi className="w-2.5 h-2.5" />}
+                {isError ? 'OFFLINE' : 'LIVE'}
               </span>
             )}
             {/* Data source pills */}
-            {!isLoading && isLive && !isMock && (
+            {!isLoading && isLive && !isError && (
               <div className="hidden md:flex items-center gap-1">
                 {['flights', 'weather', 'sentiment'].map(src => (
                   <span key={src} className={`text-[8px] px-1 py-0.5 rounded-sm ${
@@ -271,6 +271,28 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
               </motion.div>
             ))}
           </div>
+        ) : isError || destinations.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col items-center justify-center py-20 text-center"
+          >
+            <WifiOff className={`w-12 h-12 mb-4 ${isWinter ? 'text-terminal-cyan/30' : 'text-terminal-amber/30'}`} />
+            <h2 className="text-lg font-bold text-foreground mb-2">Data Unavailable</h2>
+            <p className="text-sm text-muted-foreground max-w-md mb-1">
+              {isError
+                ? 'Live data APIs could not be reached. This could be due to rate limits, network issues, or service downtime.'
+                : 'No destination data was returned for this configuration.'}
+            </p>
+            {error && (
+              <p className="text-[10px] text-terminal-red mt-2 font-mono max-w-md truncate">
+                {error.message}
+              </p>
+            )}
+            <p className="text-[10px] text-muted-foreground mt-4">
+              Try again in a few minutes or adjust your departure date.
+            </p>
+          </motion.div>
         ) : (
           <motion.div
             className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3"
@@ -308,8 +330,8 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
         {/* Footer */}
         <div className="text-center text-[9px] text-muted-foreground mt-6 pb-4 space-y-1">
           <div>
-            {isMock ? 'MOCK DATA' : 'LIVE DATA'} · PRICES IN EUR ·{' '}
-            {isLive && !isMock && (
+            LIVE DATA · PRICES IN EUR ·{' '}
+            {isLive && (
               <>
                 {isLive.flights && 'AMADEUS '}
                 {isLive.weather && '· STORMGLASS '}
