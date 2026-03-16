@@ -271,6 +271,28 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
               </motion.div>
             ))}
           </div>
+        ) : isError || destinations.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col items-center justify-center py-20 text-center"
+          >
+            <WifiOff className={`w-12 h-12 mb-4 ${isWinter ? 'text-terminal-cyan/30' : 'text-terminal-amber/30'}`} />
+            <h2 className="text-lg font-bold text-foreground mb-2">Data Unavailable</h2>
+            <p className="text-sm text-muted-foreground max-w-md mb-1">
+              {isError
+                ? 'Live data APIs could not be reached. This could be due to rate limits, network issues, or service downtime.'
+                : 'No destination data was returned for this configuration.'}
+            </p>
+            {error && (
+              <p className="text-[10px] text-terminal-red mt-2 font-mono max-w-md truncate">
+                {error.message}
+              </p>
+            )}
+            <p className="text-[10px] text-muted-foreground mt-4">
+              Try again in a few minutes or adjust your departure date.
+            </p>
+          </motion.div>
         ) : (
           <motion.div
             className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3"
