@@ -330,8 +330,8 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
         {/* Footer */}
         <div className="text-center text-[9px] text-muted-foreground mt-6 pb-4 space-y-1">
           <div>
-            {isMock ? 'MOCK DATA' : 'LIVE DATA'} · PRICES IN EUR ·{' '}
-            {isLive && !isMock && (
+            LIVE DATA · PRICES IN EUR ·{' '}
+            {isLive && (
               <>
                 {isLive.flights && 'AMADEUS '}
                 {isLive.weather && '· STORMGLASS '}
