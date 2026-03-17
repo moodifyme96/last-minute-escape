@@ -13,8 +13,8 @@ interface RegistryEntry {
   hubs: string[];
   lat: number; lng: number; altitude?: number;
   transferMinutes: number[];
-  conditionSearchQueries: string[]; // queries to find REAL current conditions
-  pricingSearchQueries: string[];   // queries to find REAL current pricing
+  conditionSearchQueries: string[];
+  pricingSearchQueries: string[];
   sentimentSearchTerms: string[];
   safeMonths?: number[];
   defaultCosts: {
@@ -31,103 +31,86 @@ const REGISTRY: Record<string, RegistryEntry> = {
     pricingSearchQueries: ["Val Thorens ski pass price 2025 daily tarif forfait", "Val Thorens hotel apartment price per night March"],
     sentimentSearchTerms: ["Val Thorens snow conditions review this week"],
     defaultCosts: { accommodationPerNight: 95, activityCostPerDay: 72, clubMedPerNight: 285, clubMedActivityIncluded: true } },
-
   w2:  { name: "Innsbruck (Nordkette)", country: "AT", region: "Alps", seasons: ["winter"], hubs: ["INN", "MUC"], lat: 47.260, lng: 11.394, altitude: 1800, transferMinutes: [15, 120],
     conditionSearchQueries: ["Innsbruck Nordkette Schneebericht snow report today", "Nordkette ski conditions current"],
     pricingSearchQueries: ["Nordkette ski pass price 2025 Tageskarte", "Innsbruck hotel price per night"],
     sentimentSearchTerms: ["Innsbruck Nordkette ski conditions review"],
     defaultCosts: { accommodationPerNight: 85, activityCostPerDay: 56, clubMedPerNight: 260, clubMedActivityIncluded: true } },
-
   w3:  { name: "Chamonix", country: "FR", region: "Alps", seasons: ["winter"], hubs: ["GVA", "LYS"], lat: 45.924, lng: 6.870, altitude: 2400, transferMinutes: [80, 180],
     conditionSearchQueries: ["Chamonix snow report today bulletin neige", "Chamonix Mont Blanc ski conditions avalanche"],
     pricingSearchQueries: ["Chamonix Mont Blanc ski pass price 2025 forfait journée", "Chamonix accommodation price per night March"],
     sentimentSearchTerms: ["Chamonix snow conditions avalanche report review"],
     defaultCosts: { accommodationPerNight: 115, activityCostPerDay: 68, clubMedPerNight: 310, clubMedActivityIncluded: true } },
-
   w4:  { name: "Zermatt", country: "CH", region: "Alps", seasons: ["winter"], hubs: ["ZRH", "GVA"], lat: 46.020, lng: 7.749, altitude: 2600, transferMinutes: [210, 240],
     conditionSearchQueries: ["Zermatt snow report today Schneebericht", "Zermatt Matterhorn glacier paradise conditions"],
     pricingSearchQueries: ["Zermatt ski pass price 2025 Tageskarte CHF EUR", "Zermatt hotel apartment price per night"],
     sentimentSearchTerms: ["Zermatt ski conditions piste review"],
     defaultCosts: { accommodationPerNight: 170, activityCostPerDay: 85, clubMedPerNight: 380, clubMedActivityIncluded: true } },
-
   w5:  { name: "St. Anton", country: "AT", region: "Alps", seasons: ["winter"], hubs: ["INN", "ZRH"], lat: 47.128, lng: 10.268, altitude: 1800, transferMinutes: [75, 150],
     conditionSearchQueries: ["St Anton am Arlberg snow report today Schneebericht", "St Anton ski conditions current"],
     pricingSearchQueries: ["St Anton Arlberg ski pass price 2025 Tageskarte", "St Anton hotel apartment price per night"],
     sentimentSearchTerms: ["St Anton am Arlberg snow conditions review"],
     defaultCosts: { accommodationPerNight: 95, activityCostPerDay: 62, clubMedPerNight: 270, clubMedActivityIncluded: true } },
-
   w6:  { name: "Bansko", country: "BG", region: "Balkans", seasons: ["winter"], hubs: ["SOF"], lat: 41.838, lng: 23.489, altitude: 1400, transferMinutes: [150],
     conditionSearchQueries: ["Bansko snow report today conditions Bulgaria", "Bansko ski conditions current snow depth"],
     pricingSearchQueries: ["Bansko ski pass price 2025 daily lift ticket", "Bansko hotel apartment price per night March"],
     sentimentSearchTerms: ["Bansko ski conditions review Bulgaria"],
     defaultCosts: { accommodationPerNight: 35, activityCostPerDay: 35, clubMedPerNight: 155, clubMedActivityIncluded: true } },
-
   w7:  { name: "Livigno", country: "IT", region: "Alps", seasons: ["winter"], hubs: ["MXP", "INN"], lat: 46.538, lng: 10.136, altitude: 1800, transferMinutes: [210, 180],
     conditionSearchQueries: ["Livigno snow report today bollettino neve", "Livigno ski conditions snowpark current"],
     pricingSearchQueries: ["Livigno skipass price 2025 giornaliero", "Livigno hotel apartment price per night"],
     sentimentSearchTerms: ["Livigno snow conditions snowpark review"],
     defaultCosts: { accommodationPerNight: 75, activityCostPerDay: 48, clubMedPerNight: 220, clubMedActivityIncluded: true } },
-
   w8:  { name: "Gudauri", country: "GE", region: "Caucasus", seasons: ["winter"], hubs: ["TBS"], lat: 42.458, lng: 44.470, altitude: 2200, transferMinutes: [120],
     conditionSearchQueries: ["Gudauri snow report today conditions Georgia", "Gudauri ski conditions freeride current"],
     pricingSearchQueries: ["Gudauri ski pass price 2025 lift ticket GEL EUR", "Gudauri hotel guesthouse price per night"],
     sentimentSearchTerms: ["Gudauri snow conditions freeride report review"],
     defaultCosts: { accommodationPerNight: 40, activityCostPerDay: 20, clubMedPerNight: 0, clubMedActivityIncluded: false } },
-
   w9:  { name: "Verbier", country: "CH", region: "Alps", seasons: ["winter"], hubs: ["GVA", "ZRH"], lat: 46.096, lng: 7.228, altitude: 2200, transferMinutes: [120, 180],
     conditionSearchQueries: ["Verbier snow report today bulletin neige", "Verbier 4 Vallées ski conditions current"],
     pricingSearchQueries: ["Verbier ski pass price 2025 4 Vallées forfait journée CHF", "Verbier hotel apartment price per night"],
     sentimentSearchTerms: ["Verbier snow conditions Mont Fort review"],
     defaultCosts: { accommodationPerNight: 185, activityCostPerDay: 78, clubMedPerNight: 395, clubMedActivityIncluded: true } },
-
   w10: { name: "Grandvalira (Soldeu)", country: "AD", region: "Pyrenees", seasons: ["winter"], hubs: ["BCN", "TLS"], lat: 42.576, lng: 1.668, altitude: 1710, transferMinutes: [180, 150],
     conditionSearchQueries: ["Grandvalira Soldeu snow report today Andorra", "Grandvalira ski conditions current snow depth"],
     pricingSearchQueries: ["Grandvalira ski pass price 2025 forfait journée", "Soldeu Andorra hotel apartment price per night"],
     sentimentSearchTerms: ["Grandvalira Soldeu Andorra snow conditions review"],
     defaultCosts: { accommodationPerNight: 70, activityCostPerDay: 52, clubMedPerNight: 235, clubMedActivityIncluded: true } },
-
   w11: { name: "Tignes", country: "FR", region: "Alps", seasons: ["winter"], hubs: ["LYS", "GVA"], lat: 45.468, lng: 6.907, altitude: 2100, transferMinutes: [150, 180],
     conditionSearchQueries: ["Tignes snow report today bulletin neige Espace Killy", "Tignes ski conditions current"],
     pricingSearchQueries: ["Tignes ski pass price 2025 Espace Killy forfait journée", "Tignes hotel apartment price per night March"],
     sentimentSearchTerms: ["Tignes Espace Killy snow conditions review"],
     defaultCosts: { accommodationPerNight: 90, activityCostPerDay: 68, clubMedPerNight: 290, clubMedActivityIncluded: true } },
-
   w12: { name: "Kitzbühel", country: "AT", region: "Alps", seasons: ["winter"], hubs: ["SZG", "MUC", "INN"], lat: 47.449, lng: 12.392, altitude: 1600, transferMinutes: [80, 120, 100],
     conditionSearchQueries: ["Kitzbühel snow report today Schneebericht", "Kitzbühel ski conditions current snow depth"],
     pricingSearchQueries: ["Kitzbühel ski pass price 2025 Tageskarte", "Kitzbühel hotel apartment price per night"],
     sentimentSearchTerms: ["Kitzbühel snow report ski conditions review"],
     defaultCosts: { accommodationPerNight: 110, activityCostPerDay: 60, clubMedPerNight: 275, clubMedActivityIncluded: true } },
-
   w13: { name: "Borovets", country: "BG", region: "Balkans", seasons: ["winter"], hubs: ["SOF"], lat: 42.265, lng: 23.608, altitude: 1300, transferMinutes: [75],
     conditionSearchQueries: ["Borovets snow report today conditions Bulgaria", "Borovets ski conditions current"],
     pricingSearchQueries: ["Borovets ski pass price 2025 lift ticket", "Borovets hotel price per night"],
     sentimentSearchTerms: ["Borovets snow conditions Bulgaria ski review"],
     defaultCosts: { accommodationPerNight: 30, activityCostPerDay: 28, clubMedPerNight: 140, clubMedActivityIncluded: true } },
-
   w14: { name: "Cervinia", country: "IT", region: "Alps", seasons: ["winter"], hubs: ["TRN", "MXP"], lat: 45.934, lng: 7.631, altitude: 2500, transferMinutes: [120, 150],
     conditionSearchQueries: ["Cervinia snow report today bollettino neve", "Cervinia Plateau Rosa ski conditions current"],
     pricingSearchQueries: ["Cervinia skipass price 2025 giornaliero", "Cervinia hotel apartment price per night"],
     sentimentSearchTerms: ["Cervinia snow conditions Plateau Rosa review"],
     defaultCosts: { accommodationPerNight: 90, activityCostPerDay: 62, clubMedPerNight: 265, clubMedActivityIncluded: true } },
-
   w15: { name: "Jasná", country: "SK", region: "Carpathians", seasons: ["winter"], hubs: ["VIE", "BUD"], lat: 48.955, lng: 19.586, altitude: 1900, transferMinutes: [240, 210],
     conditionSearchQueries: ["Jasná Low Tatras snow report today conditions", "Jasná ski conditions current snow depth"],
     pricingSearchQueries: ["Jasná ski pass price 2025 skipass denný", "Jasná hotel apartment price per night"],
     sentimentSearchTerms: ["Jasná Low Tatras snow conditions ski review"],
     defaultCosts: { accommodationPerNight: 45, activityCostPerDay: 38, clubMedPerNight: 175, clubMedActivityIncluded: true } },
-
   w16: { name: "Åre", country: "SE", region: "Scandinavia", seasons: ["winter"], hubs: ["ARN", "OSL"], lat: 63.399, lng: 13.080, altitude: 1274, transferMinutes: [360, 420],
     conditionSearchQueries: ["Åre Sweden snow report today snörapport", "Åre ski conditions current"],
     pricingSearchQueries: ["Åre ski pass price 2025 dagspass SEK", "Åre hotel apartment price per night"],
     sentimentSearchTerms: ["Åre Sweden snow conditions ski review"],
     defaultCosts: { accommodationPerNight: 110, activityCostPerDay: 58, clubMedPerNight: 0, clubMedActivityIncluded: false } },
-
   w17: { name: "Hintertux", country: "AT", region: "Alps", seasons: ["winter"], hubs: ["INN", "MUC"], lat: 47.060, lng: 11.660, altitude: 3250, transferMinutes: [90, 150],
     conditionSearchQueries: ["Hintertux glacier snow report today Schneebericht", "Hintertux Gletscher ski conditions current"],
     pricingSearchQueries: ["Hintertux glacier ski pass price 2025 Tageskarte", "Hintertux hotel apartment price per night"],
     sentimentSearchTerms: ["Hintertux glacier ski conditions snow review"],
     defaultCosts: { accommodationPerNight: 100, activityCostPerDay: 58, clubMedPerNight: 0, clubMedActivityIncluded: false } },
-
   // ─── SUMMER ───
   s1:  { name: "Peniche", country: "PT", region: "Atlantic Coast", seasons: ["summer"], hubs: ["LIS"], lat: 39.356, lng: -9.381, transferMinutes: [75],
     conditionSearchQueries: ["Peniche surf report today Supertubos", "Peniche Portugal weather conditions today"],
@@ -228,6 +211,75 @@ function calcEffectiveActivityDays(
   return Math.round(middleDays + arrivalDayValue + departureDayValue);
 }
 
+// ─── Phase 1: Fast LLM Ranking ───
+async function rankDestinations(
+  candidateIds: string[],
+  mode: "winter" | "summer",
+  departureDate: string,
+  days: number,
+  isLateSeason: boolean
+): Promise<string[]> {
+  const aiKey = Deno.env.get("LOVABLE_API_KEY");
+  if (!aiKey) return candidateIds; // fallback: original order
+
+  // Build compact metadata for ranking
+  const metadata = candidateIds.map(id => {
+    const r = REGISTRY[id];
+    const cost = r.defaultCosts.accommodationPerNight + r.defaultCosts.activityCostPerDay;
+    return `${id}: ${r.name} (${r.country}, ${r.region}, alt:${r.altitude || 0}m, ~€${cost}/day, hubs:${r.hubs.join("/")})`;
+  }).join("\n");
+
+  const seasonContext = mode === "winter"
+    ? `Focus on: snow reliability (altitude matters${isLateSeason ? " — LATE SEASON so prioritize high-altitude and glacier resorts" : ""}), value for money, flight accessibility from TLV.`
+    : `Focus on: wave/wind quality for the date, water temperature, value for money, flight accessibility from TLV.`;
+
+  const prompt = `Rank these ${mode} destinations for a ${days}-day trip departing ${departureDate} from Tel Aviv.
+${seasonContext}
+Return ONLY a JSON array of IDs in order from best to worst. No explanation.
+
+${metadata}`;
+
+  try {
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${aiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash-lite",
+        messages: [
+          { role: "system", content: "You are a travel ranking engine. Return only valid JSON arrays." },
+          { role: "user", content: prompt },
+        ],
+      }),
+    });
+
+    if (!res.ok) {
+      console.error("Ranking LLM error:", res.status);
+      return candidateIds;
+    }
+
+    const data = await res.json();
+    const content = data.choices?.[0]?.message?.content || "";
+    const match = content.match(/\[[\s\S]*\]/);
+    if (match) {
+      const ranked: string[] = JSON.parse(match[0]);
+      // Validate: only keep IDs that exist in candidates
+      const validSet = new Set(candidateIds);
+      const validRanked = ranked.filter(id => validSet.has(id));
+      // Append any missing ones at the end
+      const rankedSet = new Set(validRanked);
+      for (const id of candidateIds) {
+        if (!rankedSet.has(id)) validRanked.push(id);
+      }
+      console.log(`LLM ranked ${validRanked.length} destinations`);
+      return validRanked;
+    }
+    return candidateIds;
+  } catch (e) {
+    console.error("Ranking failed:", e);
+    return candidateIds;
+  }
+}
+
 // ─── Firecrawl: Scrape REAL data from the web ───
 async function firecrawlSearch(query: string, fcKey: string, limit = 3): Promise<{ url: string; title: string; description: string; markdown?: string }[]> {
   try {
@@ -246,15 +298,12 @@ async function firecrawlSearch(query: string, fcKey: string, limit = 3): Promise
       url: r.url || "",
       title: r.title || "",
       description: r.description || "",
-      markdown: r.markdown?.slice(0, 2000) || "", // cap per result
+      markdown: r.markdown?.slice(0, 2000) || "",
     }));
   } catch (e) { console.error("Firecrawl search error:", e); return []; }
 }
 
 // ─── Grounded Data Enrichment: Firecrawl → LLM extraction ───
-// Instead of asking LLM to hallucinate data, we:
-// 1. Search the web for REAL current data via Firecrawl
-// 2. Feed the real scraped content to LLM for STRUCTURED EXTRACTION only
 async function enrichWithGroundedData(
   destinations: { id: string; name: string; country: string; mode: string; altitude?: number;
     conditionQueries: string[]; pricingQueries: string[] }[]
@@ -270,7 +319,6 @@ async function enrichWithGroundedData(
   const today = new Date().toISOString().split("T")[0];
 
   // Step 1: Batch Firecrawl searches — conditions + pricing for each destination
-  // Process in batches of 4 to avoid rate limits
   const scrapedData: Record<string, { conditionResults: any[]; pricingResults: any[]; conditionSources: string[]; pricingSources: string[] }> = {};
 
   for (let i = 0; i < destinations.length; i += 4) {
@@ -290,44 +338,34 @@ async function enrichWithGroundedData(
         scrapedData[r.id].pricingSources = r.results.map(x => new URL(x.url || "https://unknown.com").hostname.replace("www.", "")).filter(Boolean);
       }
     }
-    // Small delay between batches
     if (i + 4 < destinations.length) await new Promise(r => setTimeout(r, 500));
   }
 
   console.log(`Firecrawl scraped data for ${Object.keys(scrapedData).length}/${destinations.length} destinations`);
 
-  // Step 2: Build a single LLM prompt with ALL the scraped real data
-  // The LLM's job is ONLY to extract structured data from the scraped content — NOT to make things up
+  // Step 2: LLM extraction
   const destPrompts = destinations.map(d => {
     const scraped = scrapedData[d.id];
     const conditionText = scraped?.conditionResults?.map(r =>
       `SOURCE: ${r.url}\nTITLE: ${r.title}\nCONTENT: ${(r.markdown || r.description || "").slice(0, 1500)}`
     ).join("\n---\n") || "NO DATA FOUND";
-
     const pricingText = scraped?.pricingResults?.map(r =>
       `SOURCE: ${r.url}\nTITLE: ${r.title}\nCONTENT: ${(r.markdown || r.description || "").slice(0, 1500)}`
     ).join("\n---\n") || "NO DATA FOUND";
-
-    return `## ${d.id}: ${d.name}, ${d.country}${d.altitude ? ` (${d.altitude}m)` : ""}
-
-### Current Conditions Data:
-${conditionText}
-
-### Pricing Data:
-${pricingText}`;
+    return `## ${d.id}: ${d.name}, ${d.country}${d.altitude ? ` (${d.altitude}m)` : ""}\n\n### Current Conditions Data:\n${conditionText}\n\n### Pricing Data:\n${pricingText}`;
   }).join("\n\n========\n\n");
 
   const winterConditionsSchema = {
     type: "object",
     properties: {
-      snowDepthBase: { type: "number", description: "Snow depth at base in cm — EXTRACT from scraped data only" },
-      snowDepthPeak: { type: "number", description: "Snow depth at peak/summit in cm — EXTRACT from scraped data only" },
-      freshSnow48h: { type: "number", description: "Fresh snow in last 48h in cm — EXTRACT from scraped data, 0 if not mentioned" },
-      tempC: { type: "number", description: "Current temperature at resort in Celsius — EXTRACT from scraped data" },
-      freezeLevel: { type: "number", description: "Freeze level in meters — EXTRACT from scraped data, or estimate from temp + altitude" },
-      recentStorm: { type: "boolean", description: "Was there a storm recently? Based on scraped data" },
-      liftStatus: { type: "string", enum: ["full", "partial", "closed"], description: "Lift operation status — EXTRACT from scraped data" },
-      dataConfidence: { type: "string", enum: ["high", "medium", "low"], description: "How confident you are in this data based on source quality" },
+      snowDepthBase: { type: "number", description: "Snow depth at base in cm" },
+      snowDepthPeak: { type: "number", description: "Snow depth at peak in cm" },
+      freshSnow48h: { type: "number", description: "Fresh snow in last 48h in cm" },
+      tempC: { type: "number", description: "Current temperature at resort in Celsius" },
+      freezeLevel: { type: "number", description: "Freeze level in meters" },
+      recentStorm: { type: "boolean" },
+      liftStatus: { type: "string", enum: ["full", "partial", "closed"] },
+      dataConfidence: { type: "string", enum: ["high", "medium", "low"] },
     },
     required: ["snowDepthBase", "snowDepthPeak", "freshSnow48h", "tempC", "freezeLevel", "recentStorm", "liftStatus", "dataConfidence"],
   };
@@ -335,12 +373,9 @@ ${pricingText}`;
   const summerConditionsSchema = {
     type: "object",
     properties: {
-      waterTempC: { type: "number" },
-      swellHeightM: { type: "number" },
-      swellPeriodS: { type: "number" },
-      windKnots: { type: "number" },
-      uvIndex: { type: "number" },
-      sunnyDays: { type: "number" },
+      waterTempC: { type: "number" }, swellHeightM: { type: "number" },
+      swellPeriodS: { type: "number" }, windKnots: { type: "number" },
+      uvIndex: { type: "number" }, sunnyDays: { type: "number" },
       rainyDays: { type: "number" },
       dataConfidence: { type: "string", enum: ["high", "medium", "low"] },
     },
@@ -385,9 +420,9 @@ CRITICAL RULES:
                       costs: {
                         type: "object",
                         properties: {
-                          accommodationPerNight: { type: "number", description: "EUR/night — extract from scraped pricing data" },
-                          activityCostPerDay: { type: "number", description: isWinter ? "Daily ski pass EUR — extract from scraped data" : "Daily activity rental EUR" },
-                          clubMedPerNight: { type: "number", description: "Club Med all-inclusive EUR/night, 0 if not found" },
+                          accommodationPerNight: { type: "number" },
+                          activityCostPerDay: { type: "number" },
+                          clubMedPerNight: { type: "number" },
                           clubMedActivityIncluded: { type: "boolean" },
                           ...(isWinter ? {} : { carRentalPerDay: { type: "number" } }),
                         },
@@ -512,9 +547,8 @@ async function fetchSentimentBatch(dests: { id: string; name: string; mode: stri
   const aiKey = Deno.env.get("LOVABLE_API_KEY");
   if (!fcKey) return {};
   const results: Record<string, any> = {};
-  const limited = dests.slice(0, 10); // expanded from 8
 
-  async function processDest(d: typeof limited[0]) {
+  async function processDest(d: typeof dests[0]) {
     try {
       const query = d.sentimentTerms[0];
       const res = await fetch("https://api.firecrawl.dev/v1/search", {
@@ -565,9 +599,8 @@ async function fetchSentimentBatch(dests: { id: string; name: string; mode: stri
     } catch (e) { console.error(`Sentiment error for ${d.id}:`, e); }
   }
 
-  // Process in batches of 5
-  for (let i = 0; i < limited.length; i += 5) {
-    await Promise.all(limited.slice(i, i + 5).map(processDest));
+  for (let i = 0; i < dests.length; i += 5) {
+    await Promise.all(dests.slice(i, i + 5).map(processDest));
   }
   return results;
 }
@@ -586,13 +619,14 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { mode, days, departureDate: reqDepDate } = await req.json() as {
+    const { mode, days, departureDate: reqDepDate, offset = 0, limit = 4 } = await req.json() as {
       mode: "winter" | "summer"; days: number; departureDate?: string;
+      offset?: number; limit?: number;
     };
 
     const entries = Object.entries(REGISTRY).filter(([_, v]) => isSeasonSafe(v, mode));
     if (entries.length === 0) {
-      return new Response(JSON.stringify({ success: true, data: [], live: { flights: false, weather: false, sentiment: false }, lateSeason: false }),
+      return new Response(JSON.stringify({ success: true, data: [], totalAvailable: 0, live: { flights: false, weather: false, sentiment: false }, lateSeason: false }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
@@ -615,19 +649,28 @@ serve(async (req) => {
 
     const isLateSeason = mode === "winter" && (now.getMonth() > 1 || (now.getMonth() === 1 && now.getDate() > 15));
 
-    const sortedEntries = [...entries];
-    if (isLateSeason) {
-      sortedEntries.sort((a, b) => (b[1].altitude || 0) - (a[1].altitude || 0));
+    // ── Phase 1: Fast LLM Ranking ──
+    const candidateIds = entries.map(([id]) => id);
+    const rankedIds = await rankDestinations(candidateIds, mode, depDate, days, isLateSeason);
+    const totalAvailable = rankedIds.length;
+
+    // Slice for this page
+    const sliceIds = rankedIds.slice(offset, offset + limit);
+    if (sliceIds.length === 0) {
+      return new Response(JSON.stringify({ success: true, data: [], totalAvailable, live: { flights: false, weather: false, sentiment: false }, lateSeason: isLateSeason }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // ── Parallel: Flights token + Grounded enrichment (Firecrawl→LLM) + Sentiment ──
-    const sentimentDests = sortedEntries.map(([id, v]) => ({
+    const sliceEntries = sliceIds.map(id => [id, REGISTRY[id]] as [string, RegistryEntry]);
+
+    // ── Phase 2: Deep Enrichment (only for this slice) ──
+    const sentimentDests = sliceEntries.map(([id, v]) => ({
       id, name: v.name, mode, sentimentTerms: v.sentimentSearchTerms,
     }));
-    const enrichDests = sortedEntries.map(([id, v]) => ({
+    const enrichDests = sliceEntries.map(([id, v]) => ({
       id, name: v.name, country: v.country, mode, altitude: v.altitude,
       conditionQueries: v.conditionSearchQueries,
-      pricingQueries: v.pricingSearchQueries,
+      pricingQueries: v.pricingQueries,
     }));
 
     const [token, groundedData, sentimentData] = await Promise.all([
@@ -636,11 +679,11 @@ serve(async (req) => {
       fetchSentimentBatch(sentimentDests),
     ]);
 
-    // ── Flights: search ALL hubs per destination, pick cheapest total ──
+    // ── Flights: search hubs for this slice only ──
     const flightsData: Record<string, any> = {};
     if (token) {
       const allHubs = new Set<string>();
-      for (const [_, reg] of sortedEntries) {
+      for (const [_, reg] of sliceEntries) {
         for (const hub of reg.hubs) allHubs.add(hub);
       }
 
@@ -651,26 +694,22 @@ serve(async (req) => {
         hubResults.set(hub, result);
       }
 
-      for (const [id, reg] of sortedEntries) {
+      for (const [id, reg] of sliceEntries) {
         let bestOption: any = null;
         let bestTotalCost = Infinity;
-
         for (let i = 0; i < reg.hubs.length; i++) {
           const hub = reg.hubs[i];
           const result = hubResults.get(hub);
           if (!result) continue;
-
           const transferMin = reg.transferMinutes[i] || 120;
           const transferCost = Math.round(transferMin <= 60 ? 30 : transferMin <= 120 ? 50 : transferMin <= 180 ? 70 : 90);
           const flightCost = result.outbound.baseFare + result.returnLeg.baseFare;
           const totalCost = flightCost + (transferCost * 2);
-
           if (totalCost < bestTotalCost) {
             bestTotalCost = totalCost;
             bestOption = { ...result, hub, airportTransfer: transferCost };
           }
         }
-
         if (bestOption) flightsData[id] = bestOption;
       }
     }
@@ -682,7 +721,7 @@ serve(async (req) => {
     };
 
     // ── Assemble Destination[] ──
-    const destinations = sortedEntries.map(([id, reg]) => {
+    const destinations = sliceEntries.map(([id, reg]) => {
       const fl = flightsData[id];
       const enriched = groundedData[id];
       const st = sentimentData[id];
@@ -736,7 +775,7 @@ serve(async (req) => {
     });
 
     return new Response(
-      JSON.stringify({ success: true, data: destinations, live: liveFlags, lateSeason: isLateSeason }),
+      JSON.stringify({ success: true, data: destinations, totalAvailable, live: liveFlags, lateSeason: isLateSeason }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {

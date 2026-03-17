@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { TravelMode, WinterConditions, SummerConditions, calculateDIYTotal } from '@/data/destinations';
 import DestinationCard from './DestinationCard';
-import { ArrowLeft, Luggage, Clock, Crown, ArrowUpDown, Wifi, WifiOff, Mountain, CalendarIcon } from 'lucide-react';
+import { ArrowLeft, Luggage, Clock, Crown, ArrowUpDown, Wifi, WifiOff, Mountain, CalendarIcon, Plus, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useDestinations } from '@/hooks/useDestinations';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -31,7 +31,7 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
   const [hasShownLiveToast, setHasShownLiveToast] = useState(false);
 
   const depDateStr = format(departureDate, 'yyyy-MM-dd');
-  const { destinations: allDestinations, isLive, isLoading, isError, error, lateSeason } = useDestinations(mode, days, depDateStr);
+  const { destinations: allDestinations, totalAvailable, isLive, isLoading, isError, error, lateSeason, hasMore, isLoadingMore, loadMore } = useDestinations(mode, days, depDateStr);
 
   // Climate guardrail: filter out unsafe summer destinations
   const { filtered, removedCount } = useMemo(() => {
@@ -128,7 +128,9 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
               <span className={`text-xs font-bold ${isWinter ? 'text-terminal-cyan' : 'text-terminal-amber'}`}>
                 {isWinter ? '❄ WINTER' : '☀ SUMMER'}
               </span>
-              <span className="text-[10px] text-muted-foreground">/ {destinations.length} DESTINATIONS / TLV ORIGIN</span>
+              <span className="text-[10px] text-muted-foreground">
+                / {destinations.length}{totalAvailable > 0 ? ` of ${totalAvailable}` : ''} DESTINATIONS / TLV ORIGIN
+              </span>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -256,7 +258,7 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
       <div className="container py-4">
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-            {Array.from({ length: 6 }).map((_, i) => (
+            {Array.from({ length: 4 }).map((_, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
@@ -294,37 +296,72 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
             </p>
           </motion.div>
         ) : (
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3"
-            initial="hidden"
-            animate="visible"
-            variants={{
-              hidden: {},
-              visible: { transition: { staggerChildren: 0.06 } },
-            }}
-          >
-            <AnimatePresence mode="popLayout">
-              {destinations.map((dest) => (
-                <motion.div
-                  key={dest.id}
-                  layout
-                  variants={{
-                    hidden: { opacity: 0, y: 24, scale: 0.97 },
-                    visible: { opacity: 1, y: 0, scale: 1 },
-                  }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          <>
+            <motion.div
+              className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3"
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: {},
+                visible: { transition: { staggerChildren: 0.06 } },
+              }}
+            >
+              <AnimatePresence mode="popLayout">
+                {destinations.map((dest) => (
+                  <motion.div
+                    key={dest.id}
+                    layout
+                    variants={{
+                      hidden: { opacity: 0, y: 24, scale: 0.97 },
+                      visible: { opacity: 1, y: 0, scale: 1 },
+                    }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                  >
+                    <DestinationCard
+                      destination={dest}
+                      days={days}
+                      addLuggage={addLuggage}
+                      showPremium={showPremium}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
+
+            {/* Find More Button */}
+            {hasMore && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex justify-center mt-6"
+              >
+                <button
+                  onClick={loadMore}
+                  disabled={isLoadingMore}
+                  className={cn(
+                    'flex items-center gap-2 px-6 py-2.5 rounded-sm border text-xs font-bold tracking-wider transition-all cursor-pointer',
+                    isWinter
+                      ? 'border-terminal-cyan text-terminal-cyan hover:bg-terminal-cyan/10'
+                      : 'border-terminal-amber text-terminal-amber hover:bg-terminal-amber/10',
+                    isLoadingMore && 'opacity-50 cursor-not-allowed'
+                  )}
                 >
-                  <DestinationCard
-                    destination={dest}
-                    days={days}
-                    addLuggage={addLuggage}
-                    showPremium={showPremium}
-                  />
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
+                  {isLoadingMore ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      SEARCHING...
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-3.5 h-3.5" />
+                      FIND MORE
+                    </>
+                  )}
+                </button>
+              </motion.div>
+            )}
+          </>
         )}
 
         {/* Footer */}
