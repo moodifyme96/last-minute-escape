@@ -51,7 +51,7 @@ export function useDestinations(mode: TravelMode, days: number, departureDate?: 
   const offsetRef = useRef(0);
 
   // Reset when params change (including filters)
-  const filtersKey = filters ? `${filters.altitudeRange.join('-')}-${filters.countries.join(',')}-${filters.regions.join(',')}` : 'none';
+  const filtersKey = filters ? `${filters.altitudeRange.join('-')}-${filters.countries.join(',')}-${filters.regions.join(',')}-${filters.slopeRange.join('-')}` : 'none';
   const paramsKey = `${mode}-${days}-${departureDate}-${filtersKey}`;
   const prevParamsKey = useRef(paramsKey);
 
