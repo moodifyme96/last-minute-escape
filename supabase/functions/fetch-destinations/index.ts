@@ -206,7 +206,7 @@ serve(async (req) => {
     const { mode, days, departureDate: reqDepDate, offset = 0, limit = 4, filters } = await req.json() as {
       mode: "winter" | "summer"; days: number; departureDate?: string;
       offset?: number; limit?: number;
-      filters?: { altitudeRange?: [number, number]; countries?: string[]; regions?: string[] };
+      filters?: { altitudeRange?: [number, number]; countries?: string[]; regions?: string[]; slopeRange?: [number, number] };
     };
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -229,6 +229,15 @@ serve(async (req) => {
           const alt = v.altitude || 0;
           return alt >= minAlt && alt <= maxAlt;
         });
+      }
+      if (filters.slopeRange) {
+        const [minSlope, maxSlope] = filters.slopeRange;
+        if (minSlope > 0 || maxSlope < 9999) {
+          entries = entries.filter(([_, v]) => {
+            const km = v.slopeKm || 0;
+            return km >= minSlope && km <= maxSlope;
+          });
+        }
       }
     }
 

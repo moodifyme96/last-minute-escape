@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { TravelMode } from '@/data/types';
 import { motion } from 'framer-motion';
-import { ArrowRight, Mountain, MapPin, Globe, Check } from 'lucide-react';
+import { ArrowRight, Mountain, MapPin, Globe, Check, Ruler } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface DestinationFilters {
   altitudeRange: [number, number]; // min, max in meters
   countries: string[];             // empty = all
   regions: string[];               // empty = all
+  slopeRange: [number, number];    // min, max in km — [0, 9999] = all
 }
 
 interface FilterScreenProps {
@@ -50,6 +51,13 @@ const ALTITUDE_PRESETS = [
   { label: "LOW\n<1500m", range: [0, 1500] as [number, number] },
 ];
 
+const SLOPE_PRESETS = [
+  { label: "ALL", range: [0, 9999] as [number, number] },
+  { label: "LARGE\n>300km", range: [300, 9999] as [number, number] },
+  { label: "MID\n100–300km", range: [100, 300] as [number, number] },
+  { label: "SMALL\n<100km", range: [0, 100] as [number, number] },
+];
+
 const FilterScreen = ({ mode, onApply, onBack }: FilterScreenProps) => {
   const isWinter = mode === 'winter';
   const countries = isWinter ? WINTER_COUNTRIES : SUMMER_COUNTRIES;
@@ -58,6 +66,7 @@ const FilterScreen = ({ mode, onApply, onBack }: FilterScreenProps) => {
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
   const [altitudeRange, setAltitudeRange] = useState<[number, number]>([0, 4000]);
+  const [slopeRange, setSlopeRange] = useState<[number, number]>([0, 9999]);
 
   const toggleCountry = (code: string) => {
     setSelectedCountries(prev =>
@@ -76,6 +85,7 @@ const FilterScreen = ({ mode, onApply, onBack }: FilterScreenProps) => {
       altitudeRange,
       countries: selectedCountries,
       regions: selectedRegions,
+      slopeRange,
     });
   };
 
@@ -118,6 +128,35 @@ const FilterScreen = ({ mode, onApply, onBack }: FilterScreenProps) => {
                   <button
                     key={preset.label}
                     onClick={() => setAltitudeRange(preset.range)}
+                    className={cn(
+                      'border rounded-sm p-3 text-center transition-all cursor-pointer',
+                      isSelected
+                        ? `${borderAccent} ${bgAccent} text-foreground`
+                        : 'border-border text-muted-foreground hover:border-muted-foreground'
+                    )}
+                  >
+                    <div className="text-[10px] font-bold whitespace-pre-line">{preset.label}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Resort Size Filter (Winter only) */}
+        {isWinter && (
+          <div className="border border-border rounded-sm p-4 bg-card">
+            <div className="flex items-center gap-2 mb-3">
+              <Ruler className={cn("w-4 h-4", accentColor)} />
+              <span className="text-[10px] text-muted-foreground uppercase tracking-widest">▸ RESORT SIZE (SLOPES KM)</span>
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+              {SLOPE_PRESETS.map(preset => {
+                const isSelected = slopeRange[0] === preset.range[0] && slopeRange[1] === preset.range[1];
+                return (
+                  <button
+                    key={preset.label}
+                    onClick={() => setSlopeRange(preset.range)}
                     className={cn(
                       'border rounded-sm p-3 text-center transition-all cursor-pointer',
                       isSelected
