@@ -29,6 +29,7 @@ async function fetchPage(
         altitudeRange: filters.altitudeRange,
         countries: filters.countries,
         regions: filters.regions,
+        slopeRange: filters.slopeRange,
       } : undefined,
     },
   });
