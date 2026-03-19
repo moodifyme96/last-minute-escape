@@ -27,7 +27,7 @@ interface RegistryEntry {
 }
 
 const REGISTRY: Record<string, RegistryEntry> = {
-  w1:  { name: "Val Thorens", country: "FR", region: "Alps", seasons: ["winter"], hubs: ["LYS", "GVA"], lat: 45.298, lng: 6.580, altitude: 2300, transferMinutes: [150, 180],
+  w1:  { name: "Val Thorens", country: "FR", region: "Alps", seasons: ["winter"], hubs: ["LYS", "GVA"], lat: 45.298, lng: 6.580, altitude: 2300, slopeKm: 600, transferMinutes: [150, 180],
     conditionSearchQueries: ["Val Thorens snow report today conditions", "Val Thorens enneigement bulletin neige"],
     pricingSearchQueries: ["Val Thorens ski pass price 2025 daily tarif forfait", "Val Thorens hotel apartment price per night March"],
     sentimentSearchTerms: ["Val Thorens snow conditions review this week"],
