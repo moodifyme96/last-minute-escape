@@ -230,6 +230,15 @@ serve(async (req) => {
           return alt >= minAlt && alt <= maxAlt;
         });
       }
+      if (filters.slopeRange) {
+        const [minSlope, maxSlope] = filters.slopeRange;
+        if (minSlope > 0 || maxSlope < 9999) {
+          entries = entries.filter(([_, v]) => {
+            const km = v.slopeKm || 0;
+            return km >= minSlope && km <= maxSlope;
+          });
+        }
+      }
     }
 
     if (entries.length === 0) {
