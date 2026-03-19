@@ -383,6 +383,7 @@ serve(async (req) => {
 
       return {
         id, name: reg.name, country: reg.country, region: reg.region, mode,
+        slopeKm: reg.slopeKm,
         flights, conditions, sentiment, costs, effectiveDays,
         _liveFlights: !!fl, _liveWeather: !!cached?.conditions, _liveSentiment: !!cached?.sentiment,
         _llmCosts: !!(cached?.costs && Object.keys(cached.costs).length > 0),
