@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { TravelMode } from '@/data/types';
 import { motion } from 'framer-motion';
-import { ArrowRight, Mountain, MapPin, Globe, Check } from 'lucide-react';
+import { ArrowRight, Mountain, MapPin, Globe, Check, Ruler } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface DestinationFilters {
