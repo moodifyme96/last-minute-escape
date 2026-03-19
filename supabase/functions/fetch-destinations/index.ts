@@ -670,7 +670,7 @@ serve(async (req) => {
     const enrichDests = sliceEntries.map(([id, v]) => ({
       id, name: v.name, country: v.country, mode, altitude: v.altitude,
       conditionQueries: v.conditionSearchQueries,
-      pricingQueries: v.pricingQueries,
+      pricingQueries: v.pricingSearchQueries,
     }));
 
     const [token, groundedData, sentimentData] = await Promise.all([
