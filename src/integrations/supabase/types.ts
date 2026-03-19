@@ -14,7 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      destination_conditions: {
+        Row: {
+          condition_sources: string[] | null
+          conditions: Json
+          costs: Json
+          country: string
+          data_confidence: string | null
+          id: string
+          mode: string
+          name: string
+          pricing_sources: string[] | null
+          region: string
+          sentiment: Json
+          synced_at: string
+        }
+        Insert: {
+          condition_sources?: string[] | null
+          conditions?: Json
+          costs?: Json
+          country: string
+          data_confidence?: string | null
+          id: string
+          mode: string
+          name: string
+          pricing_sources?: string[] | null
+          region: string
+          sentiment?: Json
+          synced_at?: string
+        }
+        Update: {
+          condition_sources?: string[] | null
+          conditions?: Json
+          costs?: Json
+          country?: string
+          data_confidence?: string | null
+          id?: string
+          mode?: string
+          name?: string
+          pricing_sources?: string[] | null
+          region?: string
+          sentiment?: Json
+          synced_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
