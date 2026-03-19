@@ -22,9 +22,10 @@ interface DashboardProps {
   onBack: () => void;
   departureDate: Date;
   onDepartureDateChange: (date: Date) => void;
+  filters: DestinationFilters;
 }
 
-const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBack, departureDate, onDepartureDateChange }: DashboardProps) => {
+const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBack, departureDate, onDepartureDateChange, filters }: DashboardProps) => {
   const isWinter = mode === 'winter';
   const [showPremium, setShowPremium] = useState(false);
   const [sortBy, setSortBy] = useState<string>(isWinter ? 'freshSnow' : 'swellHeight');
