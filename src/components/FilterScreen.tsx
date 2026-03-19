@@ -51,6 +51,13 @@ const ALTITUDE_PRESETS = [
   { label: "LOW\n<1500m", range: [0, 1500] as [number, number] },
 ];
 
+const SLOPE_PRESETS = [
+  { label: "ALL", range: [0, 9999] as [number, number] },
+  { label: "LARGE\n>300km", range: [300, 9999] as [number, number] },
+  { label: "MID\n100–300km", range: [100, 300] as [number, number] },
+  { label: "SMALL\n<100km", range: [0, 100] as [number, number] },
+];
+
 const FilterScreen = ({ mode, onApply, onBack }: FilterScreenProps) => {
   const isWinter = mode === 'winter';
   const countries = isWinter ? WINTER_COUNTRIES : SUMMER_COUNTRIES;
