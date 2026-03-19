@@ -66,6 +66,7 @@ const FilterScreen = ({ mode, onApply, onBack }: FilterScreenProps) => {
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
   const [altitudeRange, setAltitudeRange] = useState<[number, number]>([0, 4000]);
+  const [slopeRange, setSlopeRange] = useState<[number, number]>([0, 9999]);
 
   const toggleCountry = (code: string) => {
     setSelectedCountries(prev =>
