@@ -56,7 +56,7 @@ const DestinationCard = ({ destination: dest, days, addLuggage, showPremium }: D
           )}
         </div>
         {isWinter ? (
-          <WinterEnvDisplay conditions={dest.conditions as WinterConditions} />
+          <WinterEnvDisplay conditions={dest.conditions as WinterConditions} slopeKm={dest.slopeKm} />
         ) : (
           <SummerEnvDisplay conditions={dest.conditions as SummerConditions} />
         )}
