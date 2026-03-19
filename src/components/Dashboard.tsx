@@ -33,7 +33,7 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
   const [hasShownLiveToast, setHasShownLiveToast] = useState(false);
 
   const depDateStr = format(departureDate, 'yyyy-MM-dd');
-  const { destinations: allDestinations, totalAvailable, isLive, isLoading, isError, error, lateSeason, hasMore, isLoadingMore, loadMore } = useDestinations(mode, days, depDateStr);
+  const { destinations: allDestinations, totalAvailable, isLive, isLoading, isError, error, lateSeason, hasMore, isLoadingMore, loadMore } = useDestinations(mode, days, depDateStr, filters);
 
   // Climate guardrail: filter out unsafe summer destinations
   const { filtered, removedCount } = useMemo(() => {
