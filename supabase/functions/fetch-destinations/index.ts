@@ -673,27 +673,33 @@ serve(async (req) => {
       pricingQueries: v.pricingSearchQueries,
     }));
 
-    const [token, groundedData, sentimentData] = await Promise.all([
-      getAmadeusToken(),
+    // ── Run ALL enrichment concurrently: flights, grounded data, sentiment ──
+    const allHubs = new Set<string>();
+    for (const [_, reg] of sliceEntries) {
+      for (const hub of reg.hubs) allHubs.add(hub);
+    }
+
+    // Flight searches start as soon as token is ready (don't wait for Firecrawl/sentiment)
+    const flightsPromise = (async () => {
+      const token = await getAmadeusToken();
+      if (!token) return { token: null, hubResults: new Map<string, any>() };
+      // Search all hubs in parallel (no sequential delays)
+      const hubList = [...allHubs];
+      const results = await Promise.all(hubList.map(hub => searchFlight(token, hub, depDate, retDate)));
+      const hubResults = new Map<string, any>();
+      hubList.forEach((hub, i) => hubResults.set(hub, results[i]));
+      return { token, hubResults };
+    })();
+
+    const [{ token, hubResults }, groundedData, sentimentData] = await Promise.all([
+      flightsPromise,
       enrichWithGroundedData(enrichDests),
       fetchSentimentBatch(sentimentDests),
     ]);
 
-    // ── Flights: search hubs for this slice only ──
+    // ── Assemble flight data per destination ──
     const flightsData: Record<string, any> = {};
     if (token) {
-      const allHubs = new Set<string>();
-      for (const [_, reg] of sliceEntries) {
-        for (const hub of reg.hubs) allHubs.add(hub);
-      }
-
-      const hubResults = new Map<string, any>();
-      for (const hub of allHubs) {
-        await new Promise(r => setTimeout(r, 120));
-        const result = await searchFlight(token, hub, depDate, retDate);
-        hubResults.set(hub, result);
-      }
-
       for (const [id, reg] of sliceEntries) {
         let bestOption: any = null;
         let bestTotalCost = Infinity;
