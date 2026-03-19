@@ -427,28 +427,30 @@ serve(async (req) => {
     console.log(`Starting sync for ${entries.length} destinations${modeFilter ? ` (${modeFilter} only)` : ""}`);
 
     // Process in batches of 4 to avoid Firecrawl rate limits
-    const BATCH = 4;
+    // Process in batches of 2 (smaller = better LLM extraction reliability)
+    const BATCH = 2;
     let totalSynced = 0;
 
     for (let i = 0; i < entries.length; i += BATCH) {
       const batch = entries.slice(i, i + BATCH);
-      const mode = batch[0][1].seasons[0]; // winter or summer
+      const mode = batch[0][1].seasons[0];
 
-      // Enrichment
+      // Step 1: Enrichment (conditions + pricing via Firecrawl → LLM)
       const enrichDests = batch.map(([id, v]) => ({
         id, name: v.name, country: v.country, mode,
         altitude: v.altitude,
         conditionQueries: v.conditionSearchQueries,
         pricingQueries: v.pricingSearchQueries,
       }));
+
+      const groundedData = await enrichBatch(enrichDests, fcKey, aiKey);
+
+      // Step 2: Sentiment AFTER enrichment (sequential to avoid Firecrawl rate limits)
       const sentimentDests = batch.map(([id, v]) => ({
         id, name: v.name, mode, sentimentTerms: v.sentimentSearchTerms,
       }));
-
-      const [groundedData, sentimentData] = await Promise.all([
-        enrichBatch(enrichDests, fcKey, aiKey),
-        fetchSentimentBatch(sentimentDests, fcKey, aiKey),
-      ]);
+      await new Promise(r => setTimeout(r, 1000)); // breathe before sentiment
+      const sentimentData = await fetchSentimentBatch(sentimentDests, fcKey, aiKey);
 
       // Upsert each destination
       for (const [id, reg] of batch) {
@@ -476,13 +478,13 @@ serve(async (req) => {
           console.error(`Upsert error for ${id}:`, error);
         } else {
           totalSynced++;
-          console.log(`✓ Synced ${id}: ${reg.name}`);
+          console.log(`✓ Synced ${id}: ${reg.name} (confidence: ${row.data_confidence}, vibe: ${(sentiment?.vibeScore || 0)})`);
         }
       }
 
-      // Pause between batches to avoid rate limits
+      // Pause between batches
       if (i + BATCH < entries.length) {
-        console.log(`Pausing between batches... (${totalSynced}/${entries.length} done)`);
+        console.log(`Pausing... (${totalSynced}/${entries.length} done)`);
         await new Promise(r => setTimeout(r, 2000));
       }
     }
