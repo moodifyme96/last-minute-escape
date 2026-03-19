@@ -347,17 +347,27 @@ async function fetchSentimentBatch(dests: { id: string; name: string; mode: stri
       const res = await fetch("https://api.firecrawl.dev/v1/search", {
         method: "POST",
         headers: { Authorization: `Bearer ${fcKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ query: d.sentimentTerms[0], limit: 3, tbs: "qdr:m" }),
+        body: JSON.stringify({
+          query: d.sentimentTerms[0],
+          limit: 3,
+          tbs: "qdr:m",
+          scrapeOptions: { formats: ["markdown"], onlyMainContent: true },
+        }),
       });
-      if (!res.ok) { await res.text(); return; }
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error(`Sentiment search failed for ${d.id}:`, res.status, errText);
+        return;
+      }
       const data = await res.json();
       const sources: any[] = [];
       const snippets: string[] = [];
       if (data?.data) {
         for (const r of data.data.slice(0, 3)) {
-          const domain = new URL(r.url || "https://unknown.com").hostname.replace("www.", "");
-          const snippet = r.description?.slice(0, 120) || r.title || "";
-          if (snippet) { sources.push({ platform: domain, snippet }); snippets.push(r.description || snippet); }
+          let domain = "unknown";
+          try { domain = new URL(r.url || "https://unknown.com").hostname.replace("www.", ""); } catch {}
+          const snippet = r.markdown?.slice(0, 300) || r.description?.slice(0, 200) || r.title || "";
+          if (snippet) { sources.push({ platform: domain, snippet: snippet.slice(0, 120) }); snippets.push(snippet); }
         }
       }
       let vibeScore = 60;
