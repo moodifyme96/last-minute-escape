@@ -8,6 +8,7 @@ export interface DestinationFilters {
   altitudeRange: [number, number]; // min, max in meters
   countries: string[];             // empty = all
   regions: string[];               // empty = all
+  slopeRange: [number, number];    // min, max in km — [0, 9999] = all
 }
 
 interface FilterScreenProps {
