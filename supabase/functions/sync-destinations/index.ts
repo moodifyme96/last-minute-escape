@@ -13,6 +13,7 @@ interface RegistryEntry {
   seasons: ("winter" | "summer")[];
   hubs: string[];
   lat: number; lng: number; altitude?: number;
+  slopeKm?: number;
   transferMinutes: number[];
   conditionSearchQueries: string[];
   pricingSearchQueries: string[];
