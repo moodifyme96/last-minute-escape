@@ -143,6 +143,35 @@ const FilterScreen = ({ mode, onApply, onBack }: FilterScreenProps) => {
           </div>
         )}
 
+        {/* Resort Size Filter (Winter only) */}
+        {isWinter && (
+          <div className="border border-border rounded-sm p-4 bg-card">
+            <div className="flex items-center gap-2 mb-3">
+              <Ruler className={cn("w-4 h-4", accentColor)} />
+              <span className="text-[10px] text-muted-foreground uppercase tracking-widest">▸ RESORT SIZE (SLOPES KM)</span>
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+              {SLOPE_PRESETS.map(preset => {
+                const isSelected = slopeRange[0] === preset.range[0] && slopeRange[1] === preset.range[1];
+                return (
+                  <button
+                    key={preset.label}
+                    onClick={() => setSlopeRange(preset.range)}
+                    className={cn(
+                      'border rounded-sm p-3 text-center transition-all cursor-pointer',
+                      isSelected
+                        ? `${borderAccent} ${bgAccent} text-foreground`
+                        : 'border-border text-muted-foreground hover:border-muted-foreground'
+                    )}
+                  >
+                    <div className="text-[10px] font-bold whitespace-pre-line">{preset.label}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Countries */}
         <div className="border border-border rounded-sm p-4 bg-card">
           <div className="flex items-center justify-between mb-3">
