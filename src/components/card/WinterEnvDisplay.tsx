@@ -1,8 +1,13 @@
 import { WinterConditions } from '@/data/types';
-import { Mountain, Snowflake, Thermometer, AlertTriangle } from 'lucide-react';
+import { Mountain, Snowflake, Thermometer, AlertTriangle, Ruler } from 'lucide-react';
 
-const WinterEnvDisplay = ({ conditions: c }: { conditions: WinterConditions }) => (
-  <div className="grid grid-cols-4 gap-2 text-[10px]">
+interface WinterEnvDisplayProps {
+  conditions: WinterConditions;
+  slopeKm?: number;
+}
+
+const WinterEnvDisplay = ({ conditions: c, slopeKm }: WinterEnvDisplayProps) => (
+  <div className="grid grid-cols-5 gap-2 text-[10px]">
     <div>
       <div className="text-muted-foreground flex items-center gap-0.5"><Mountain className="w-2.5 h-2.5" /> Snow</div>
       <div className="text-terminal-cyan font-bold">{c.snowDepthBase}/{c.snowDepthPeak}cm</div>
@@ -17,6 +22,11 @@ const WinterEnvDisplay = ({ conditions: c }: { conditions: WinterConditions }) =
       <div className="text-muted-foreground flex items-center gap-0.5"><Thermometer className="w-2.5 h-2.5" /> Temp</div>
       <div className="text-terminal-cyan font-bold">{c.tempC}°C</div>
       <div className="text-[9px] text-muted-foreground">{c.altitude}m</div>
+    </div>
+    <div>
+      <div className="text-muted-foreground flex items-center gap-0.5"><Ruler className="w-2.5 h-2.5" /> Size</div>
+      <div className="text-terminal-cyan font-bold">{slopeKm || '—'}km</div>
+      <div className="text-[9px] text-muted-foreground">pistes</div>
     </div>
     <div>
       <div className="text-muted-foreground flex items-center gap-0.5"><AlertTriangle className="w-2.5 h-2.5" /> Storm</div>

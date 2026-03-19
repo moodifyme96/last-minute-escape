@@ -73,6 +73,7 @@ export interface Destination {
   country: string;         // ISO 2-letter
   region: string;          // e.g. "Alps", "Atlantic Coast"
   mode: TravelMode;
+  slopeKm?: number;        // km of pistes/slopes (winter) or coastline (summer)
   flights: Flights;
   conditions: ResortConditions;
   sentiment: NLPSentiment;

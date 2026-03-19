@@ -13,6 +13,7 @@ interface RegistryEntry {
   seasons: ("winter" | "summer")[];
   hubs: string[];
   lat: number; lng: number; altitude?: number;
+  slopeKm?: number;
   transferMinutes: number[];
   conditionSearchQueries: string[];
   pricingSearchQueries: string[];
@@ -273,20 +274,21 @@ async function enrichBatch(
   };
 
   try {
+    const activity = isWinter ? "skiing/snowboarding" : "surfing/kitesurfing";
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${aiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: `You are a data EXTRACTION engine. Extract structured data from web-scraped content.\nRULES:\n1. ONLY extract explicitly stated data.\n2. If no data found, set dataConfidence to "low" and use reasonable estimates.\n3. For pricing: extract EXACT prices. Convert to EUR (CHF×1.07, GBP×1.17, SEK×0.088, BGN×0.51, GEL×0.34).\n4. Do NOT invent data.` },
-          { role: "user", content: `Today is ${today}. Extract structured data:\n\n${destPrompts}` },
+          { role: "system", content: `You are a data EXTRACTION engine. Extract structured data from web-scraped content.\nRULES:\n1. ONLY extract explicitly stated data.\n2. If no data found, set dataConfidence to "low" and use reasonable estimates based on your knowledge of the destination.\n3. For pricing: extract EXACT prices. Convert to EUR (CHF×1.07, GBP×1.17, SEK×0.088, BGN×0.51, GEL×0.34).\n4. Do NOT invent data — but DO provide reasonable estimates when no data is found (mark as low confidence).\n5. For sentiment: analyze the scraped content to gauge current ${activity} conditions sentiment. Generate a vibeScore (0-100) and a practical 2-sentence summary. Extract source platforms and key quotes.` },
+          { role: "user", content: `Today is ${today}. Extract structured data AND sentiment for each destination:\n\n${destPrompts}` },
         ],
         tools: [{
           type: "function",
           function: {
             name: "set_destination_data",
-            description: "Set extracted conditions and costs for all destinations",
+            description: "Set extracted conditions, costs, and sentiment for all destinations",
             parameters: {
               type: "object",
               properties: {
@@ -306,8 +308,27 @@ async function enrichBatch(
                         },
                         required: ["accommodationPerNight", "activityCostPerDay", "clubMedPerNight", "clubMedActivityIncluded"],
                       },
+                      sentiment: {
+                        type: "object",
+                        properties: {
+                          vibeScore: { type: "number", description: "0-100 score based on current conditions quality and traveler sentiment" },
+                          summary: { type: "string", description: "2-sentence practical summary of current conditions and vibe" },
+                          sources: {
+                            type: "array",
+                            items: {
+                              type: "object",
+                              properties: {
+                                platform: { type: "string", description: "Source domain or platform name" },
+                                snippet: { type: "string", description: "Key quote or finding, max 120 chars" },
+                              },
+                              required: ["platform", "snippet"],
+                            },
+                          },
+                        },
+                        required: ["vibeScore", "summary", "sources"],
+                      },
                     },
-                    required: ["id", "conditions", "costs"],
+                    required: ["id", "conditions", "costs", "sentiment"],
                   },
                 },
               },
@@ -325,76 +346,22 @@ async function enrichBatch(
     if (!toolCall?.function?.arguments) { console.error("LLM returned no tool call"); return {}; }
 
     const parsed = JSON.parse(toolCall.function.arguments);
-    const result: Record<string, { conditions: any; costs: any; conditionSources: string[]; pricingSources: string[] }> = {};
+    const result: Record<string, { conditions: any; costs: any; sentiment: any; conditionSources: string[]; pricingSources: string[] }> = {};
     for (const d of parsed.destinations || []) {
       if (d.id && d.conditions && d.costs) {
         const scraped = scrapedData[d.id];
-        result[d.id] = { conditions: d.conditions, costs: d.costs, conditionSources: scraped?.conditionSources || [], pricingSources: scraped?.pricingSources || [] };
+        result[d.id] = {
+          conditions: d.conditions,
+          costs: d.costs,
+          sentiment: d.sentiment || { vibeScore: 50, summary: "Conditions under assessment.", sources: [] },
+          conditionSources: scraped?.conditionSources || [],
+          pricingSources: scraped?.pricingSources || [],
+        };
       }
     }
     console.log(`LLM extracted ${Object.keys(result).length}/${destinations.length}`);
     return result;
   } catch (e) { console.error("Enrichment failed:", e); return {}; }
-}
-
-// ─── Sentiment batch ───
-async function fetchSentimentBatch(dests: { id: string; name: string; mode: string; sentimentTerms: string[] }[], fcKey: string, aiKey: string) {
-  const results: Record<string, any> = {};
-
-  async function processDest(d: typeof dests[0]) {
-    try {
-      const res = await fetch("https://api.firecrawl.dev/v1/search", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${fcKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ query: d.sentimentTerms[0], limit: 3, tbs: "qdr:m" }),
-      });
-      if (!res.ok) { await res.text(); return; }
-      const data = await res.json();
-      const sources: any[] = [];
-      const snippets: string[] = [];
-      if (data?.data) {
-        for (const r of data.data.slice(0, 3)) {
-          const domain = new URL(r.url || "https://unknown.com").hostname.replace("www.", "");
-          const snippet = r.description?.slice(0, 120) || r.title || "";
-          if (snippet) { sources.push({ platform: domain, snippet }); snippets.push(r.description || snippet); }
-        }
-      }
-      let vibeScore = 60;
-      let summary = `Conditions at ${d.name} under monitoring.`;
-      if (aiKey && snippets.length > 0) {
-        try {
-          const activity = d.mode === "winter" ? "skiing/snowboarding" : "surfing/kitesurfing";
-          const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-            method: "POST",
-            headers: { Authorization: `Bearer ${aiKey}`, "Content-Type": "application/json" },
-            body: JSON.stringify({
-              model: "google/gemini-2.5-flash-lite",
-              messages: [
-                { role: "system", content: "You are a travel conditions analyst. Return only valid JSON." },
-                { role: "user", content: `Analyze these snippets about ${d.name} for ${activity}:\n${snippets.map((s, i) => `${i + 1}. ${s.slice(0, 200)}`).join("\n")}\n\nReturn JSON: {"vibeScore": <0-100>, "summary": "<2 sentences max, practical info>"}` },
-              ],
-            }),
-          });
-          if (aiRes.ok) {
-            const aiData = await aiRes.json();
-            const content = aiData.choices?.[0]?.message?.content || "";
-            const match = content.match(/\{[\s\S]*\}/);
-            if (match) {
-              const parsed = JSON.parse(match[0]);
-              vibeScore = Math.max(0, Math.min(100, parsed.vibeScore || 60));
-              summary = parsed.summary || summary;
-            }
-          }
-        } catch (e) { console.error("AI sentiment error:", e); }
-      }
-      results[d.id] = { vibeScore, summary, sources: sources.slice(0, 3), lastUpdated: new Date().toISOString() };
-    } catch (e) { console.error(`Sentiment error for ${d.id}:`, e); }
-  }
-
-  for (let i = 0; i < dests.length; i += 5) {
-    await Promise.all(dests.slice(i, i + 5).map(processDest));
-  }
-  return results;
 }
 
 // ─── Main sync handler ───
@@ -426,7 +393,6 @@ serve(async (req) => {
 
     console.log(`Starting sync for ${entries.length} destinations${modeFilter ? ` (${modeFilter} only)` : ""}`);
 
-    // Process in batches of 4 to avoid Firecrawl rate limits
     // Process in batches of 2 (smaller = better LLM extraction reliability)
     const BATCH = 2;
     let totalSynced = 0;
@@ -435,7 +401,7 @@ serve(async (req) => {
       const batch = entries.slice(i, i + BATCH);
       const mode = batch[0][1].seasons[0];
 
-      // Step 1: Enrichment (conditions + pricing via Firecrawl → LLM)
+      // Single enrichment call: conditions + pricing + sentiment via Firecrawl → LLM
       const enrichDests = batch.map(([id, v]) => ({
         id, name: v.name, country: v.country, mode,
         altitude: v.altitude,
@@ -445,18 +411,13 @@ serve(async (req) => {
 
       const groundedData = await enrichBatch(enrichDests, fcKey, aiKey);
 
-      // Step 2: Sentiment AFTER enrichment (sequential to avoid Firecrawl rate limits)
-      const sentimentDests = batch.map(([id, v]) => ({
-        id, name: v.name, mode, sentimentTerms: v.sentimentSearchTerms,
-      }));
-      await new Promise(r => setTimeout(r, 1000)); // breathe before sentiment
-      const sentimentData = await fetchSentimentBatch(sentimentDests, fcKey, aiKey);
-
       // Upsert each destination
       for (const [id, reg] of batch) {
         const enriched = groundedData[id];
-        const sentiment = sentimentData[id];
         const destMode = reg.seasons[0];
+        const sentiment = enriched?.sentiment
+          ? { ...enriched.sentiment, lastUpdated: new Date().toISOString() }
+          : { vibeScore: 0, summary: "No data available.", sources: [], lastUpdated: new Date().toISOString() };
 
         const row = {
           id,
@@ -466,7 +427,7 @@ serve(async (req) => {
           region: reg.region,
           conditions: enriched?.conditions || {},
           costs: enriched?.costs || reg.defaultCosts,
-          sentiment: sentiment || { vibeScore: 0, summary: "No data available.", sources: [], lastUpdated: new Date().toISOString() },
+          sentiment,
           condition_sources: enriched?.conditionSources || [],
           pricing_sources: enriched?.pricingSources || [],
           data_confidence: enriched?.conditions?.dataConfidence || "low",
@@ -478,7 +439,7 @@ serve(async (req) => {
           console.error(`Upsert error for ${id}:`, error);
         } else {
           totalSynced++;
-          console.log(`✓ Synced ${id}: ${reg.name} (confidence: ${row.data_confidence}, vibe: ${(sentiment?.vibeScore || 0)})`);
+          console.log(`✓ Synced ${id}: ${reg.name} (confidence: ${row.data_confidence}, vibe: ${sentiment.vibeScore})`);
         }
       }
 
