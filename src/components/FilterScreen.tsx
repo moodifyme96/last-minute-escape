@@ -85,6 +85,7 @@ const FilterScreen = ({ mode, onApply, onBack }: FilterScreenProps) => {
       altitudeRange,
       countries: selectedCountries,
       regions: selectedRegions,
+      slopeRange,
     });
   };
 
