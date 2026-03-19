@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { TravelMode, Destination } from '@/data/types';
+import { DestinationFilters } from '@/components/FilterScreen';
 
 export interface LiveFlags {
   flights: boolean;
@@ -17,9 +18,19 @@ interface FetchResult {
   lateSeason?: boolean;
 }
 
-async function fetchPage(mode: TravelMode, days: number, departureDate: string | undefined, offset: number, limit: number): Promise<FetchResult> {
+async function fetchPage(
+  mode: TravelMode, days: number, departureDate: string | undefined,
+  offset: number, limit: number, filters?: DestinationFilters
+): Promise<FetchResult> {
   const { data, error } = await supabase.functions.invoke('fetch-destinations', {
-    body: { mode, days, departureDate, offset, limit },
+    body: {
+      mode, days, departureDate, offset, limit,
+      filters: filters ? {
+        altitudeRange: filters.altitudeRange,
+        countries: filters.countries,
+        regions: filters.regions,
+      } : undefined,
+    },
   });
 
   if (error) throw error;
@@ -31,7 +42,7 @@ async function fetchPage(mode: TravelMode, days: number, departureDate: string |
 const INITIAL_LIMIT = 4;
 const MORE_LIMIT = 3;
 
-export function useDestinations(mode: TravelMode, days: number, departureDate?: string) {
+export function useDestinations(mode: TravelMode, days: number, departureDate?: string, filters?: DestinationFilters) {
   const [accumulated, setAccumulated] = useState<FetchResult['data']>([]);
   const [totalAvailable, setTotalAvailable] = useState(0);
   const [liveFlags, setLiveFlags] = useState<LiveFlags | null>(null);
@@ -39,8 +50,9 @@ export function useDestinations(mode: TravelMode, days: number, departureDate?: 
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const offsetRef = useRef(0);
 
-  // Reset when params change
-  const paramsKey = `${mode}-${days}-${departureDate}`;
+  // Reset when params change (including filters)
+  const filtersKey = filters ? `${filters.altitudeRange.join('-')}-${filters.countries.join(',')}-${filters.regions.join(',')}` : 'none';
+  const paramsKey = `${mode}-${days}-${departureDate}-${filtersKey}`;
   const prevParamsKey = useRef(paramsKey);
 
   if (prevParamsKey.current !== paramsKey) {
@@ -52,16 +64,14 @@ export function useDestinations(mode: TravelMode, days: number, departureDate?: 
     offsetRef.current = 0;
   }
 
-  // Initial fetch (first 4)
   const query = useQuery({
-    queryKey: ['destinations', mode, days, departureDate, 'initial'],
-    queryFn: () => fetchPage(mode, days, departureDate, 0, INITIAL_LIMIT),
+    queryKey: ['destinations', mode, days, departureDate, filtersKey, 'initial'],
+    queryFn: () => fetchPage(mode, days, departureDate, 0, INITIAL_LIMIT, filters),
     staleTime: 15 * 60 * 1000,
     retry: 1,
     refetchOnWindowFocus: false,
   });
 
-  // Sync initial results
   useEffect(() => {
     if (query.data) {
       setAccumulated(query.data.data);
@@ -78,10 +88,9 @@ export function useDestinations(mode: TravelMode, days: number, departureDate?: 
     if (isLoadingMore || !hasMore) return;
     setIsLoadingMore(true);
     try {
-      const result = await fetchPage(mode, days, departureDate, offsetRef.current, MORE_LIMIT);
+      const result = await fetchPage(mode, days, departureDate, offsetRef.current, MORE_LIMIT, filters);
       setAccumulated(prev => [...prev, ...result.data]);
       offsetRef.current += result.data.length;
-      // Merge live flags (OR)
       if (result.live) {
         setLiveFlags(prev => prev ? {
           flights: prev.flights || result.live.flights,
@@ -94,7 +103,7 @@ export function useDestinations(mode: TravelMode, days: number, departureDate?: 
     } finally {
       setIsLoadingMore(false);
     }
-  }, [mode, days, departureDate, isLoadingMore, hasMore]);
+  }, [mode, days, departureDate, filters, isLoadingMore, hasMore]);
 
   return {
     destinations: accumulated,

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { TravelMode, WinterConditions, SummerConditions, calculateDIYTotal } from '@/data/destinations';
+import { DestinationFilters } from '@/components/FilterScreen';
 import DestinationCard from './DestinationCard';
 import { ArrowLeft, Luggage, Clock, Crown, ArrowUpDown, Wifi, WifiOff, Mountain, CalendarIcon, Plus, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
@@ -21,9 +22,10 @@ interface DashboardProps {
   onBack: () => void;
   departureDate: Date;
   onDepartureDateChange: (date: Date) => void;
+  filters: DestinationFilters;
 }
 
-const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBack, departureDate, onDepartureDateChange }: DashboardProps) => {
+const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBack, departureDate, onDepartureDateChange, filters }: DashboardProps) => {
   const isWinter = mode === 'winter';
   const [showPremium, setShowPremium] = useState(false);
   const [sortBy, setSortBy] = useState<string>(isWinter ? 'freshSnow' : 'swellHeight');
@@ -31,7 +33,7 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
   const [hasShownLiveToast, setHasShownLiveToast] = useState(false);
 
   const depDateStr = format(departureDate, 'yyyy-MM-dd');
-  const { destinations: allDestinations, totalAvailable, isLive, isLoading, isError, error, lateSeason, hasMore, isLoadingMore, loadMore } = useDestinations(mode, days, depDateStr);
+  const { destinations: allDestinations, totalAvailable, isLive, isLoading, isError, error, lateSeason, hasMore, isLoadingMore, loadMore } = useDestinations(mode, days, depDateStr, filters);
 
   // Climate guardrail: filter out unsafe summer destinations
   const { filtered, removedCount } = useMemo(() => {
