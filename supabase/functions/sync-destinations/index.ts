@@ -274,20 +274,21 @@ async function enrichBatch(
   };
 
   try {
+    const activity = isWinter ? "skiing/snowboarding" : "surfing/kitesurfing";
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${aiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: `You are a data EXTRACTION engine. Extract structured data from web-scraped content.\nRULES:\n1. ONLY extract explicitly stated data.\n2. If no data found, set dataConfidence to "low" and use reasonable estimates.\n3. For pricing: extract EXACT prices. Convert to EUR (CHF×1.07, GBP×1.17, SEK×0.088, BGN×0.51, GEL×0.34).\n4. Do NOT invent data.` },
-          { role: "user", content: `Today is ${today}. Extract structured data:\n\n${destPrompts}` },
+          { role: "system", content: `You are a data EXTRACTION engine. Extract structured data from web-scraped content.\nRULES:\n1. ONLY extract explicitly stated data.\n2. If no data found, set dataConfidence to "low" and use reasonable estimates based on your knowledge of the destination.\n3. For pricing: extract EXACT prices. Convert to EUR (CHF×1.07, GBP×1.17, SEK×0.088, BGN×0.51, GEL×0.34).\n4. Do NOT invent data — but DO provide reasonable estimates when no data is found (mark as low confidence).\n5. For sentiment: analyze the scraped content to gauge current ${activity} conditions sentiment. Generate a vibeScore (0-100) and a practical 2-sentence summary. Extract source platforms and key quotes.` },
+          { role: "user", content: `Today is ${today}. Extract structured data AND sentiment for each destination:\n\n${destPrompts}` },
         ],
         tools: [{
           type: "function",
           function: {
             name: "set_destination_data",
-            description: "Set extracted conditions and costs for all destinations",
+            description: "Set extracted conditions, costs, and sentiment for all destinations",
             parameters: {
               type: "object",
               properties: {
@@ -307,8 +308,27 @@ async function enrichBatch(
                         },
                         required: ["accommodationPerNight", "activityCostPerDay", "clubMedPerNight", "clubMedActivityIncluded"],
                       },
+                      sentiment: {
+                        type: "object",
+                        properties: {
+                          vibeScore: { type: "number", description: "0-100 score based on current conditions quality and traveler sentiment" },
+                          summary: { type: "string", description: "2-sentence practical summary of current conditions and vibe" },
+                          sources: {
+                            type: "array",
+                            items: {
+                              type: "object",
+                              properties: {
+                                platform: { type: "string", description: "Source domain or platform name" },
+                                snippet: { type: "string", description: "Key quote or finding, max 120 chars" },
+                              },
+                              required: ["platform", "snippet"],
+                            },
+                          },
+                        },
+                        required: ["vibeScore", "summary", "sources"],
+                      },
                     },
-                    required: ["id", "conditions", "costs"],
+                    required: ["id", "conditions", "costs", "sentiment"],
                   },
                 },
               },
