@@ -202,16 +202,35 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { mode, days, departureDate: reqDepDate, offset = 0, limit = 4 } = await req.json() as {
+    const { mode, days, departureDate: reqDepDate, offset = 0, limit = 4, filters } = await req.json() as {
       mode: "winter" | "summer"; days: number; departureDate?: string;
       offset?: number; limit?: number;
+      filters?: { altitudeRange?: [number, number]; countries?: string[]; regions?: string[] };
     };
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const entries = Object.entries(REGISTRY).filter(([_, v]) => isSeasonSafe(v, mode));
+    let entries = Object.entries(REGISTRY).filter(([_, v]) => isSeasonSafe(v, mode));
+
+    // Apply user filters
+    if (filters) {
+      if (filters.countries && filters.countries.length > 0) {
+        entries = entries.filter(([_, v]) => filters.countries!.includes(v.country));
+      }
+      if (filters.regions && filters.regions.length > 0) {
+        entries = entries.filter(([_, v]) => filters.regions!.includes(v.region));
+      }
+      if (filters.altitudeRange && mode === "winter") {
+        const [minAlt, maxAlt] = filters.altitudeRange;
+        entries = entries.filter(([_, v]) => {
+          const alt = v.altitude || 0;
+          return alt >= minAlt && alt <= maxAlt;
+        });
+      }
+    }
+
     if (entries.length === 0) {
       return new Response(JSON.stringify({ success: true, data: [], totalAvailable: 0, live: { flights: false, weather: false, sentiment: false }, lateSeason: false }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } });
