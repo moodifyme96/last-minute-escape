@@ -281,8 +281,17 @@ async function enrichBatch(
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: `You are a data EXTRACTION engine. Extract structured data from web-scraped content.\nRULES:\n1. ONLY extract explicitly stated data.\n2. If no data found, set dataConfidence to "low" and use reasonable estimates based on your knowledge of the destination.\n3. For pricing: extract EXACT prices. Convert to EUR (CHF×1.07, GBP×1.17, SEK×0.088, BGN×0.51, GEL×0.34).\n4. Do NOT invent data — but DO provide reasonable estimates when no data is found (mark as low confidence).\n5. For sentiment: analyze the scraped content to gauge current ${activity} conditions sentiment. Generate a vibeScore (0-100) and a practical 2-sentence summary. Extract source platforms and key quotes.` },
-          { role: "user", content: `Today is ${today}. Extract structured data AND sentiment for each destination:\n\n${destPrompts}` },
+          { role: "system", content: `You are a STRICT data extraction engine for ${activity} destinations. Extract structured data from web-scraped content.
+
+CRITICAL RULES:
+1. ONLY use numbers EXPLICITLY stated in the scraped content. Do NOT estimate, guess, or use your general knowledge for conditions data.
+2. If a value is NOT explicitly found in the scraped content, set it to 0 (zero).
+3. Set dataConfidence to "high" if you found explicit current data, "medium" if data is from the last 7 days, "low" if no real data found.
+4. For pricing: extract EXACT prices from scraped content. Convert to EUR (CHF×1.07, GBP×1.17, SEK×0.088, BGN×0.51, GEL×0.34). If not found, use 0.
+5. For sentiment: analyze the scraped content tone. The vibeScore should reflect ACTUAL conditions quality (0=terrible/closed, 50=mediocre, 80+=excellent). Write a practical 2-sentence summary.
+6. For sentiment sources: you MUST include the source domains provided in the scraped data. Each source should have a relevant snippet extracted from that source's content.
+7. NEVER invent snow depths, temperatures, or wave heights. Zero is better than a guess.` },
+          { role: "user", content: `Today is ${today}. Extract structured data AND sentiment for each destination. Remember: use ONLY explicitly stated values from the scraped content. Set to 0 if not found.\n\n${destPrompts}` },
         ],
         tools: [{
           type: "function",
@@ -311,15 +320,16 @@ async function enrichBatch(
                       sentiment: {
                         type: "object",
                         properties: {
-                          vibeScore: { type: "number", description: "0-100 score based on current conditions quality and traveler sentiment" },
-                          summary: { type: "string", description: "2-sentence practical summary of current conditions and vibe" },
+                          vibeScore: { type: "number", description: "0-100 score based on ACTUAL conditions found in scraped data. 0 if no data." },
+                          summary: { type: "string", description: "2-sentence practical summary. If no data scraped, say 'No current data available from monitored sources.'" },
                           sources: {
                             type: "array",
+                            description: "MUST include source domains from the scraped content. Extract the domain name and a relevant snippet.",
                             items: {
                               type: "object",
                               properties: {
-                                platform: { type: "string", description: "Source domain or platform name" },
-                                snippet: { type: "string", description: "Key quote or finding, max 120 chars" },
+                                platform: { type: "string", description: "Source domain (e.g. 'j2ski.com', 'snow-online.com')" },
+                                snippet: { type: "string", description: "Key data point extracted from this source, max 120 chars" },
                               },
                               required: ["platform", "snippet"],
                             },
@@ -353,7 +363,7 @@ async function enrichBatch(
         result[d.id] = {
           conditions: d.conditions,
           costs: d.costs,
-          sentiment: d.sentiment || { vibeScore: 50, summary: "Conditions under assessment.", sources: [] },
+          sentiment: d.sentiment || { vibeScore: 0, summary: "No current data available.", sources: [] },
           conditionSources: scraped?.conditionSources || [],
           pricingSources: scraped?.pricingSources || [],
         };
