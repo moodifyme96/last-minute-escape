@@ -435,8 +435,11 @@ serve(async (req) => {
           name: reg.name,
           country: reg.country,
           region: reg.region,
-          conditions: enriched?.conditions || {},
-          costs: enriched?.costs || reg.defaultCosts,
+          conditions: {
+            ...(enriched?.conditions || {}),
+            altitude: reg.altitude || 0,  // Always merge altitude from registry
+          },
+          costs: enriched?.costs?.accommodationPerNight > 0 ? enriched.costs : reg.defaultCosts,
           sentiment,
           condition_sources: enriched?.conditionSources || [],
           pricing_sources: enriched?.pricingSources || [],
