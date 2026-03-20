@@ -197,11 +197,17 @@ async function firecrawlSearch(query: string, fcKey: string, limit = 3) {
       headers: { Authorization: `Bearer ${fcKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({ query, limit, scrapeOptions: { formats: ["markdown"], onlyMainContent: true } }),
     });
-    if (!res.ok) { await res.text(); return []; }
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error(`Firecrawl ${res.status} for "${query.slice(0, 40)}": ${errText.slice(0, 200)}`);
+      return [];
+    }
     const data = await res.json();
-    return (data?.data || []).map((r: any) => ({
+    const results = (data?.data || []).map((r: any) => ({
       url: r.url || "", title: r.title || "", description: r.description || "", markdown: r.markdown?.slice(0, 2000) || "",
     }));
+    console.log(`Firecrawl "${query.slice(0, 35)}" → ${results.length} results, content: ${results.map((r: any) => `${r.url?.slice(0, 40)}(${r.markdown?.length || 0}ch)`).join(", ")}`);
+    return results;
   } catch (e) { console.error("Firecrawl search error:", e); return []; }
 }
 
