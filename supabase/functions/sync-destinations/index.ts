@@ -287,17 +287,18 @@ async function enrichBatch(
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: `You are a STRICT data extraction engine for ${activity} destinations. Extract structured data from web-scraped content.
+          { role: "system", content: `You are a data extraction engine for ${activity} destinations. Extract structured data from web-scraped content.
 
-CRITICAL RULES:
-1. ONLY use numbers EXPLICITLY stated in the scraped content. Do NOT estimate, guess, or use your general knowledge for conditions data.
-2. If a value is NOT explicitly found in the scraped content, set it to 0 (zero).
-3. Set dataConfidence to "high" if you found explicit current data, "medium" if data is from the last 7 days, "low" if no real data found.
-4. For pricing: extract EXACT prices from scraped content. Convert to EUR (CHF×1.07, GBP×1.17, SEK×0.088, BGN×0.51, GEL×0.34). If not found, use 0.
-5. For sentiment: analyze the scraped content tone. The vibeScore should reflect ACTUAL conditions quality (0=terrible/closed, 50=mediocre, 80+=excellent). Write a practical 2-sentence summary.
-6. For sentiment sources: you MUST include the source domains provided in the scraped data. Each source should have a relevant snippet extracted from that source's content.
-7. NEVER invent snow depths, temperatures, or wave heights. Zero is better than a guess.` },
-          { role: "user", content: `Today is ${today}. Extract structured data AND sentiment for each destination. Remember: use ONLY explicitly stated values from the scraped content. Set to 0 if not found.\n\n${destPrompts}` },
+RULES:
+1. PREFER explicitly stated data from the scraped content. When exact numbers are found, use them and set dataConfidence to "high".
+2. If scraped content mentions conditions but not exact numbers, make reasonable inferences and set dataConfidence to "medium".
+3. If NO relevant scraped content exists, use your knowledge of the destination for this time of year and set dataConfidence to "low".
+4. For pricing: extract prices from scraped content. Convert to EUR (CHF×1.07, GBP×1.17, SEK×0.088, BGN×0.51, GEL×0.34). If not found, use your knowledge of typical prices.
+5. For sentiment: analyze scraped content tone. vibeScore should reflect conditions quality (0=closed, 30=poor, 50=fair, 70=good, 90=excellent). Write a practical 2-sentence summary about CURRENT conditions.
+6. For sentiment sources: reference the actual source domains from scraped data. Include a relevant snippet from each.
+7. liftStatus: "full" means nearly all lifts open, "partial" means some closed, "closed" means resort is closed.
+8. Today is late March — consider seasonal context (spring skiing, late season) in your assessments.` },
+          { role: "user", content: `Today is ${today}. Extract structured data AND sentiment for each destination.\n\n${destPrompts}` },
         ],
         tools: [{
           type: "function",
