@@ -197,11 +197,17 @@ async function firecrawlSearch(query: string, fcKey: string, limit = 3) {
       headers: { Authorization: `Bearer ${fcKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({ query, limit, scrapeOptions: { formats: ["markdown"], onlyMainContent: true } }),
     });
-    if (!res.ok) { await res.text(); return []; }
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error(`Firecrawl ${res.status} for "${query.slice(0, 40)}": ${errText.slice(0, 200)}`);
+      return [];
+    }
     const data = await res.json();
-    return (data?.data || []).map((r: any) => ({
+    const results = (data?.data || []).map((r: any) => ({
       url: r.url || "", title: r.title || "", description: r.description || "", markdown: r.markdown?.slice(0, 2000) || "",
     }));
+    console.log(`Firecrawl "${query.slice(0, 35)}" → ${results.length} results, content: ${results.map((r: any) => `${r.url?.slice(0, 40)}(${r.markdown?.length || 0}ch)`).join(", ")}`);
+    return results;
   } catch (e) { console.error("Firecrawl search error:", e); return []; }
 }
 
@@ -281,8 +287,18 @@ async function enrichBatch(
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: `You are a data EXTRACTION engine. Extract structured data from web-scraped content.\nRULES:\n1. ONLY extract explicitly stated data.\n2. If no data found, set dataConfidence to "low" and use reasonable estimates based on your knowledge of the destination.\n3. For pricing: extract EXACT prices. Convert to EUR (CHF×1.07, GBP×1.17, SEK×0.088, BGN×0.51, GEL×0.34).\n4. Do NOT invent data — but DO provide reasonable estimates when no data is found (mark as low confidence).\n5. For sentiment: analyze the scraped content to gauge current ${activity} conditions sentiment. Generate a vibeScore (0-100) and a practical 2-sentence summary. Extract source platforms and key quotes.` },
-          { role: "user", content: `Today is ${today}. Extract structured data AND sentiment for each destination:\n\n${destPrompts}` },
+          { role: "system", content: `You are a data extraction engine for ${activity} destinations. Extract structured data from web-scraped content.
+
+RULES:
+1. PREFER explicitly stated data from the scraped content. When exact numbers are found, use them and set dataConfidence to "high".
+2. If scraped content mentions conditions but not exact numbers, make reasonable inferences and set dataConfidence to "medium".
+3. If NO relevant scraped content exists, use your knowledge of the destination for this time of year and set dataConfidence to "low".
+4. For pricing: extract prices from scraped content. Convert to EUR (CHF×1.07, GBP×1.17, SEK×0.088, BGN×0.51, GEL×0.34). If not found, use your knowledge of typical prices.
+5. For sentiment: analyze scraped content tone. vibeScore should reflect conditions quality (0=closed, 30=poor, 50=fair, 70=good, 90=excellent). Write a practical 2-sentence summary about CURRENT conditions.
+6. For sentiment sources: reference the actual source domains from scraped data. Include a relevant snippet from each.
+7. liftStatus: "full" means nearly all lifts open, "partial" means some closed, "closed" means resort is closed.
+8. Today is late March — consider seasonal context (spring skiing, late season) in your assessments.` },
+          { role: "user", content: `Today is ${today}. Extract structured data AND sentiment for each destination.\n\n${destPrompts}` },
         ],
         tools: [{
           type: "function",
@@ -311,15 +327,16 @@ async function enrichBatch(
                       sentiment: {
                         type: "object",
                         properties: {
-                          vibeScore: { type: "number", description: "0-100 score based on current conditions quality and traveler sentiment" },
-                          summary: { type: "string", description: "2-sentence practical summary of current conditions and vibe" },
+                          vibeScore: { type: "number", description: "0-100 score based on ACTUAL conditions found in scraped data. 0 if no data." },
+                          summary: { type: "string", description: "2-sentence practical summary. If no data scraped, say 'No current data available from monitored sources.'" },
                           sources: {
                             type: "array",
+                            description: "MUST include source domains from the scraped content. Extract the domain name and a relevant snippet.",
                             items: {
                               type: "object",
                               properties: {
-                                platform: { type: "string", description: "Source domain or platform name" },
-                                snippet: { type: "string", description: "Key quote or finding, max 120 chars" },
+                                platform: { type: "string", description: "Source domain (e.g. 'j2ski.com', 'snow-online.com')" },
+                                snippet: { type: "string", description: "Key data point extracted from this source, max 120 chars" },
                               },
                               required: ["platform", "snippet"],
                             },
@@ -353,7 +370,7 @@ async function enrichBatch(
         result[d.id] = {
           conditions: d.conditions,
           costs: d.costs,
-          sentiment: d.sentiment || { vibeScore: 50, summary: "Conditions under assessment.", sources: [] },
+          sentiment: d.sentiment || { vibeScore: 0, summary: "No current data available.", sources: [] },
           conditionSources: scraped?.conditionSources || [],
           pricingSources: scraped?.pricingSources || [],
         };
@@ -425,8 +442,11 @@ serve(async (req) => {
           name: reg.name,
           country: reg.country,
           region: reg.region,
-          conditions: enriched?.conditions || {},
-          costs: enriched?.costs || reg.defaultCosts,
+          conditions: {
+            ...(enriched?.conditions || {}),
+            altitude: reg.altitude || 0,  // Always merge altitude from registry
+          },
+          costs: enriched?.costs?.accommodationPerNight > 0 ? enriched.costs : reg.defaultCosts,
           sentiment,
           condition_sources: enriched?.conditionSources || [],
           pricing_sources: enriched?.pricingSources || [],
