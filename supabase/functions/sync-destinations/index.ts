@@ -255,7 +255,7 @@ serve(async (req) => {
 
     // Phase 1: Fetch all weather data in parallel (Open-Meteo is free, no rate limits)
     const conditionsMap: Record<string, any> = {};
-    const PARALLEL_BATCH = 8;
+    const PARALLEL_BATCH = 5;
 
     for (let i = 0; i < entries.length; i += PARALLEL_BATCH) {
       const batch = entries.slice(i, i + PARALLEL_BATCH);
