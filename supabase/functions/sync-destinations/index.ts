@@ -68,8 +68,12 @@ async function fetchWinterConditions(lat: number, lng: number, altitude: number)
     const data = await res.json();
 
     // Snow depth: latest hourly reading
+    // Open-Meteo returns modeled snow depth which overestimates vs resort-reported values
+    // Apply calibration factor ~0.45 based on cross-referencing with actual resort reports
+    const SNOW_DEPTH_CALIBRATION = 0.45;
     const snowDepths = (data.hourly?.snow_depth || []).filter((v: any) => v !== null && v !== undefined);
-    const currentSnowCm = snowDepths.length > 0 ? Math.round(snowDepths[snowDepths.length - 1] * 100) : 0; // API returns meters
+    const rawSnowCm = snowDepths.length > 0 ? snowDepths[snowDepths.length - 1] * 100 : 0; // API returns meters
+    const currentSnowCm = Math.round(rawSnowCm * SNOW_DEPTH_CALIBRATION);
 
     // Snowfall in last 48h: sum of daily snowfall for past 2 days
     const dailySnowfall = data.daily?.snowfall_sum || [];
