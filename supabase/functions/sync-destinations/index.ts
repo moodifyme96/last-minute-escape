@@ -292,7 +292,7 @@ serve(async (req) => {
         const mode = reg.seasons[0];
         let conditions: any = null;
         if (mode === "winter") {
-          conditions = await fetchWinterConditions(reg.lat, reg.lng, reg.altitude || 1500);
+          conditions = await fetchWinterConditions(reg.lat, reg.lng, reg.altitude || 1500, reg.snowForecastSlug);
         } else {
           conditions = await fetchSummerConditions(reg.lat, reg.lng);
         }
