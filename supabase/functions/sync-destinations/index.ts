@@ -16,6 +16,7 @@ interface RegistryEntry {
   slopeKm?: number;
   transferMinutes: number[];
   safeMonths?: number[];
+  snowForecastSlug?: string;
   defaultCosts: {
     accommodationPerNight: number; activityCostPerDay: number;
     clubMedPerNight: number; clubMedActivityIncluded: boolean;
@@ -24,23 +25,23 @@ interface RegistryEntry {
 }
 
 const REGISTRY: Record<string, RegistryEntry> = {
-  w1:  { name: "Val Thorens", country: "FR", region: "Alps", seasons: ["winter"], hubs: ["LYS", "GVA"], lat: 45.298, lng: 6.580, altitude: 2300, slopeKm: 600, transferMinutes: [150, 180], defaultCosts: { accommodationPerNight: 95, activityCostPerDay: 72, clubMedPerNight: 285, clubMedActivityIncluded: true } },
-  w2:  { name: "Innsbruck (Nordkette)", country: "AT", region: "Alps", seasons: ["winter"], hubs: ["INN", "MUC"], lat: 47.260, lng: 11.394, altitude: 1800, slopeKm: 22, transferMinutes: [15, 120], defaultCosts: { accommodationPerNight: 85, activityCostPerDay: 56, clubMedPerNight: 260, clubMedActivityIncluded: true } },
-  w3:  { name: "Chamonix", country: "FR", region: "Alps", seasons: ["winter"], hubs: ["GVA", "LYS"], lat: 45.924, lng: 6.870, altitude: 2400, slopeKm: 155, transferMinutes: [80, 180], defaultCosts: { accommodationPerNight: 115, activityCostPerDay: 68, clubMedPerNight: 310, clubMedActivityIncluded: true } },
-  w4:  { name: "Zermatt", country: "CH", region: "Alps", seasons: ["winter"], hubs: ["ZRH", "GVA"], lat: 46.020, lng: 7.749, altitude: 2600, slopeKm: 360, transferMinutes: [210, 240], defaultCosts: { accommodationPerNight: 170, activityCostPerDay: 85, clubMedPerNight: 380, clubMedActivityIncluded: true } },
-  w5:  { name: "St. Anton", country: "AT", region: "Alps", seasons: ["winter"], hubs: ["INN", "ZRH"], lat: 47.128, lng: 10.268, altitude: 1800, slopeKm: 305, transferMinutes: [75, 150], defaultCosts: { accommodationPerNight: 95, activityCostPerDay: 62, clubMedPerNight: 270, clubMedActivityIncluded: true } },
-  w6:  { name: "Bansko", country: "BG", region: "Balkans", seasons: ["winter"], hubs: ["SOF"], lat: 41.838, lng: 23.489, altitude: 1400, slopeKm: 48, transferMinutes: [150], defaultCosts: { accommodationPerNight: 35, activityCostPerDay: 35, clubMedPerNight: 155, clubMedActivityIncluded: true } },
-  w7:  { name: "Livigno", country: "IT", region: "Alps", seasons: ["winter"], hubs: ["MXP", "INN"], lat: 46.538, lng: 10.136, altitude: 1800, slopeKm: 115, transferMinutes: [210, 180], defaultCosts: { accommodationPerNight: 75, activityCostPerDay: 48, clubMedPerNight: 220, clubMedActivityIncluded: true } },
-  w8:  { name: "Gudauri", country: "GE", region: "Caucasus", seasons: ["winter"], hubs: ["TBS"], lat: 42.458, lng: 44.470, altitude: 2200, slopeKm: 75, transferMinutes: [120], defaultCosts: { accommodationPerNight: 40, activityCostPerDay: 20, clubMedPerNight: 0, clubMedActivityIncluded: false } },
-  w9:  { name: "Verbier", country: "CH", region: "Alps", seasons: ["winter"], hubs: ["GVA", "ZRH"], lat: 46.096, lng: 7.228, altitude: 2200, slopeKm: 410, transferMinutes: [120, 180], defaultCosts: { accommodationPerNight: 185, activityCostPerDay: 78, clubMedPerNight: 395, clubMedActivityIncluded: true } },
-  w10: { name: "Grandvalira (Soldeu)", country: "AD", region: "Pyrenees", seasons: ["winter"], hubs: ["BCN", "TLS"], lat: 42.576, lng: 1.668, altitude: 1710, slopeKm: 210, transferMinutes: [180, 150], defaultCosts: { accommodationPerNight: 70, activityCostPerDay: 52, clubMedPerNight: 235, clubMedActivityIncluded: true } },
-  w11: { name: "Tignes", country: "FR", region: "Alps", seasons: ["winter"], hubs: ["LYS", "GVA"], lat: 45.468, lng: 6.907, altitude: 2100, slopeKm: 300, transferMinutes: [150, 180], defaultCosts: { accommodationPerNight: 90, activityCostPerDay: 68, clubMedPerNight: 290, clubMedActivityIncluded: true } },
-  w12: { name: "Kitzbühel", country: "AT", region: "Alps", seasons: ["winter"], hubs: ["SZG", "MUC", "INN"], lat: 47.449, lng: 12.392, altitude: 1600, slopeKm: 170, transferMinutes: [80, 120, 100], defaultCosts: { accommodationPerNight: 110, activityCostPerDay: 60, clubMedPerNight: 275, clubMedActivityIncluded: true } },
-  w13: { name: "Borovets", country: "BG", region: "Balkans", seasons: ["winter"], hubs: ["SOF"], lat: 42.265, lng: 23.608, altitude: 1300, slopeKm: 58, transferMinutes: [75], defaultCosts: { accommodationPerNight: 30, activityCostPerDay: 28, clubMedPerNight: 140, clubMedActivityIncluded: true } },
-  w14: { name: "Cervinia", country: "IT", region: "Alps", seasons: ["winter"], hubs: ["TRN", "MXP"], lat: 45.934, lng: 7.631, altitude: 2500, slopeKm: 360, transferMinutes: [120, 150], defaultCosts: { accommodationPerNight: 90, activityCostPerDay: 62, clubMedPerNight: 265, clubMedActivityIncluded: true } },
-  w15: { name: "Jasná", country: "SK", region: "Carpathians", seasons: ["winter"], hubs: ["VIE", "BUD"], lat: 48.955, lng: 19.586, altitude: 1900, slopeKm: 50, transferMinutes: [240, 210], defaultCosts: { accommodationPerNight: 45, activityCostPerDay: 38, clubMedPerNight: 175, clubMedActivityIncluded: true } },
-  w16: { name: "Åre", country: "SE", region: "Scandinavia", seasons: ["winter"], hubs: ["ARN", "OSL"], lat: 63.399, lng: 13.080, altitude: 1274, slopeKm: 100, transferMinutes: [360, 420], defaultCosts: { accommodationPerNight: 110, activityCostPerDay: 58, clubMedPerNight: 0, clubMedActivityIncluded: false } },
-  w17: { name: "Hintertux", country: "AT", region: "Alps", seasons: ["winter"], hubs: ["INN", "MUC"], lat: 47.060, lng: 11.660, altitude: 3250, slopeKm: 60, transferMinutes: [90, 150], defaultCosts: { accommodationPerNight: 100, activityCostPerDay: 58, clubMedPerNight: 0, clubMedActivityIncluded: false } },
+  w1:  { name: "Val Thorens", country: "FR", region: "Alps", seasons: ["winter"], hubs: ["LYS", "GVA"], lat: 45.298, lng: 6.580, altitude: 2300, slopeKm: 600, transferMinutes: [150, 180], snowForecastSlug: "Val-Thorens", defaultCosts: { accommodationPerNight: 95, activityCostPerDay: 72, clubMedPerNight: 285, clubMedActivityIncluded: true } },
+  w2:  { name: "Innsbruck (Nordkette)", country: "AT", region: "Alps", seasons: ["winter"], hubs: ["INN", "MUC"], lat: 47.260, lng: 11.394, altitude: 1800, slopeKm: 22, transferMinutes: [15, 120], snowForecastSlug: "Nordpark", defaultCosts: { accommodationPerNight: 85, activityCostPerDay: 56, clubMedPerNight: 260, clubMedActivityIncluded: true } },
+  w3:  { name: "Chamonix", country: "FR", region: "Alps", seasons: ["winter"], hubs: ["GVA", "LYS"], lat: 45.924, lng: 6.870, altitude: 2400, slopeKm: 155, transferMinutes: [80, 180], snowForecastSlug: "Chamonix", defaultCosts: { accommodationPerNight: 115, activityCostPerDay: 68, clubMedPerNight: 310, clubMedActivityIncluded: true } },
+  w4:  { name: "Zermatt", country: "CH", region: "Alps", seasons: ["winter"], hubs: ["ZRH", "GVA"], lat: 46.020, lng: 7.749, altitude: 2600, slopeKm: 360, transferMinutes: [210, 240], snowForecastSlug: "Zermatt", defaultCosts: { accommodationPerNight: 170, activityCostPerDay: 85, clubMedPerNight: 380, clubMedActivityIncluded: true } },
+  w5:  { name: "St. Anton", country: "AT", region: "Alps", seasons: ["winter"], hubs: ["INN", "ZRH"], lat: 47.128, lng: 10.268, altitude: 1800, slopeKm: 305, transferMinutes: [75, 150], snowForecastSlug: "St-Anton", defaultCosts: { accommodationPerNight: 95, activityCostPerDay: 62, clubMedPerNight: 270, clubMedActivityIncluded: true } },
+  w6:  { name: "Bansko", country: "BG", region: "Balkans", seasons: ["winter"], hubs: ["SOF"], lat: 41.838, lng: 23.489, altitude: 1400, slopeKm: 48, transferMinutes: [150], snowForecastSlug: "Bansko", defaultCosts: { accommodationPerNight: 35, activityCostPerDay: 35, clubMedPerNight: 155, clubMedActivityIncluded: true } },
+  w7:  { name: "Livigno", country: "IT", region: "Alps", seasons: ["winter"], hubs: ["MXP", "INN"], lat: 46.538, lng: 10.136, altitude: 1800, slopeKm: 115, transferMinutes: [210, 180], snowForecastSlug: "Livigno", defaultCosts: { accommodationPerNight: 75, activityCostPerDay: 48, clubMedPerNight: 220, clubMedActivityIncluded: true } },
+  w8:  { name: "Gudauri", country: "GE", region: "Caucasus", seasons: ["winter"], hubs: ["TBS"], lat: 42.458, lng: 44.470, altitude: 2200, slopeKm: 75, transferMinutes: [120], snowForecastSlug: "Gudauri", defaultCosts: { accommodationPerNight: 40, activityCostPerDay: 20, clubMedPerNight: 0, clubMedActivityIncluded: false } },
+  w9:  { name: "Verbier", country: "CH", region: "Alps", seasons: ["winter"], hubs: ["GVA", "ZRH"], lat: 46.096, lng: 7.228, altitude: 2200, slopeKm: 410, transferMinutes: [120, 180], snowForecastSlug: "Verbier", defaultCosts: { accommodationPerNight: 185, activityCostPerDay: 78, clubMedPerNight: 395, clubMedActivityIncluded: true } },
+  w10: { name: "Grandvalira (Soldeu)", country: "AD", region: "Pyrenees", seasons: ["winter"], hubs: ["BCN", "TLS"], lat: 42.576, lng: 1.668, altitude: 1710, slopeKm: 210, transferMinutes: [180, 150], snowForecastSlug: "El-Tarter-Soldeu", defaultCosts: { accommodationPerNight: 70, activityCostPerDay: 52, clubMedPerNight: 235, clubMedActivityIncluded: true } },
+  w11: { name: "Tignes", country: "FR", region: "Alps", seasons: ["winter"], hubs: ["LYS", "GVA"], lat: 45.468, lng: 6.907, altitude: 2100, slopeKm: 300, transferMinutes: [150, 180], snowForecastSlug: "Tignes", defaultCosts: { accommodationPerNight: 90, activityCostPerDay: 68, clubMedPerNight: 290, clubMedActivityIncluded: true } },
+  w12: { name: "Kitzbühel", country: "AT", region: "Alps", seasons: ["winter"], hubs: ["SZG", "MUC", "INN"], lat: 47.449, lng: 12.392, altitude: 1600, slopeKm: 170, transferMinutes: [80, 120, 100], snowForecastSlug: "Kitzbuhel", defaultCosts: { accommodationPerNight: 110, activityCostPerDay: 60, clubMedPerNight: 275, clubMedActivityIncluded: true } },
+  w13: { name: "Borovets", country: "BG", region: "Balkans", seasons: ["winter"], hubs: ["SOF"], lat: 42.265, lng: 23.608, altitude: 1300, slopeKm: 58, transferMinutes: [75], snowForecastSlug: "Borovets", defaultCosts: { accommodationPerNight: 30, activityCostPerDay: 28, clubMedPerNight: 140, clubMedActivityIncluded: true } },
+  w14: { name: "Cervinia", country: "IT", region: "Alps", seasons: ["winter"], hubs: ["TRN", "MXP"], lat: 45.934, lng: 7.631, altitude: 2500, slopeKm: 360, transferMinutes: [120, 150], snowForecastSlug: "Cervinia", defaultCosts: { accommodationPerNight: 90, activityCostPerDay: 62, clubMedPerNight: 265, clubMedActivityIncluded: true } },
+  w15: { name: "Jasná", country: "SK", region: "Carpathians", seasons: ["winter"], hubs: ["VIE", "BUD"], lat: 48.955, lng: 19.586, altitude: 1900, slopeKm: 50, transferMinutes: [240, 210], snowForecastSlug: "Jasna-Chopok", defaultCosts: { accommodationPerNight: 45, activityCostPerDay: 38, clubMedPerNight: 175, clubMedActivityIncluded: true } },
+  w16: { name: "Åre", country: "SE", region: "Scandinavia", seasons: ["winter"], hubs: ["ARN", "OSL"], lat: 63.399, lng: 13.080, altitude: 1274, slopeKm: 100, transferMinutes: [360, 420], snowForecastSlug: "Are-Duved", defaultCosts: { accommodationPerNight: 110, activityCostPerDay: 58, clubMedPerNight: 0, clubMedActivityIncluded: false } },
+  w17: { name: "Hintertux", country: "AT", region: "Alps", seasons: ["winter"], hubs: ["INN", "MUC"], lat: 47.060, lng: 11.660, altitude: 3250, slopeKm: 60, transferMinutes: [90, 150], snowForecastSlug: "Hintertux", defaultCosts: { accommodationPerNight: 100, activityCostPerDay: 58, clubMedPerNight: 0, clubMedActivityIncluded: false } },
   s1:  { name: "Peniche", country: "PT", region: "Atlantic Coast", seasons: ["summer"], hubs: ["LIS"], lat: 39.356, lng: -9.381, transferMinutes: [75], safeMonths: [4,5,6,7,8,9,10], defaultCosts: { accommodationPerNight: 55, activityCostPerDay: 35, clubMedPerNight: 195, clubMedActivityIncluded: true, carRentalPerDay: 25 } },
   s2:  { name: "Tarifa", country: "ES", region: "Mediterranean", seasons: ["summer"], hubs: ["AGP", "SVQ"], lat: 36.014, lng: -5.604, transferMinutes: [120, 150], safeMonths: [4,5,6,7,8,9,10], defaultCosts: { accommodationPerNight: 65, activityCostPerDay: 45, clubMedPerNight: 220, clubMedActivityIncluded: true, carRentalPerDay: 30 } },
   s3:  { name: "Dahab", country: "EG", region: "Red Sea", seasons: ["summer"], hubs: ["SSH"], lat: 28.500, lng: 34.513, transferMinutes: [60], safeMonths: [1,2,3,4,5,6,9,10,11,12], defaultCosts: { accommodationPerNight: 25, activityCostPerDay: 20, clubMedPerNight: 0, clubMedActivityIncluded: false, carRentalPerDay: 15 } },
@@ -58,48 +59,71 @@ const REGISTRY: Record<string, RegistryEntry> = {
   s15: { name: "Split", country: "HR", region: "Mediterranean", seasons: ["summer"], hubs: ["SPU", "ZAG"], lat: 43.508, lng: 16.440, transferMinutes: [20, 240], safeMonths: [5,6,7,8,9,10], defaultCosts: { accommodationPerNight: 60, activityCostPerDay: 30, clubMedPerNight: 210, clubMedActivityIncluded: true, carRentalPerDay: 25 } },
 };
 
-// ─── Open-Meteo: Winter conditions ───
-async function fetchWinterConditions(lat: number, lng: number, altitude: number): Promise<any> {
+// ─── Snow-Forecast.com: Real resort-reported snow depths ───
+async function fetchSnowDepths(slug: string): Promise<{ upper: number; lower: number } | null> {
   try {
-    // Fetch snow depth, snowfall, temperature at the resort's elevation
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=snowfall_sum,temperature_2m_min,temperature_2m_max&hourly=snow_depth&past_days=2&forecast_days=1&timezone=auto&elevation=${altitude}`;
+    const res = await fetch(`https://www.snow-forecast.com/resorts/${slug}`, {
+      headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
+    });
+    if (!res.ok) { console.error(`snow-forecast.com ${slug}: HTTP ${res.status}`); return null; }
+    const html = await res.text();
+    const upperMatch = html.match(/Upper snow depth:[\s\S]*?<span class="snow">(\d+)<\/span>/i);
+    const lowerMatch = html.match(/Lower snow depth:[\s\S]*?<span class="snow">(\d+)<\/span>/i);
+    return {
+      upper: upperMatch ? parseInt(upperMatch[1]) : 0,
+      lower: lowerMatch ? parseInt(lowerMatch[1]) : 0,
+    };
+  } catch (e) {
+    console.error(`snow-forecast.com fetch failed for ${slug}:`, e);
+    return null;
+  }
+}
+
+// ─── Open-Meteo: Winter weather (temp, snowfall, wind — NOT snow depth) ───
+async function fetchWinterConditions(lat: number, lng: number, altitude: number, snowForecastSlug?: string): Promise<any> {
+  try {
+    // Fetch real snow depths from snow-forecast.com (resort-reported)
+    let snowDepthBase = 0;
+    let snowDepthPeak = 0;
+    let snowSource = "unavailable";
+    if (snowForecastSlug) {
+      const depths = await fetchSnowDepths(snowForecastSlug);
+      if (depths) {
+        snowDepthBase = depths.lower;
+        snowDepthPeak = depths.upper;
+        snowSource = "snow-forecast.com";
+      }
+    }
+
+    // Fetch weather data from Open-Meteo (temp, fresh snowfall, wind)
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=snowfall_sum,temperature_2m_min,temperature_2m_max&past_days=2&forecast_days=1&timezone=auto&elevation=${altitude}`;
     const res = await fetch(url);
     if (!res.ok) { console.error(`Open-Meteo winter error ${res.status} for ${lat},${lng}`); return null; }
     const data = await res.json();
 
-    // Snow depth: latest hourly reading
-    // Open-Meteo returns modeled snow depth which overestimates vs resort-reported values
-    // Apply calibration factor ~0.45 based on cross-referencing with actual resort reports
-    const SNOW_DEPTH_CALIBRATION = 0.45;
-    const snowDepths = (data.hourly?.snow_depth || []).filter((v: any) => v !== null && v !== undefined);
-    const rawSnowCm = snowDepths.length > 0 ? snowDepths[snowDepths.length - 1] * 100 : 0; // API returns meters
-    const currentSnowCm = Math.round(rawSnowCm * SNOW_DEPTH_CALIBRATION);
-
-    // Snowfall in last 48h: sum of daily snowfall for past 2 days
+    // Snowfall in last 48h
     const dailySnowfall = data.daily?.snowfall_sum || [];
-    const freshSnow48h = Math.round(dailySnowfall.slice(0, 2).reduce((a: number, b: number) => a + (b || 0), 0) * 10) / 10; // cm
+    const freshSnow48h = Math.round(dailySnowfall.slice(0, 2).reduce((a: number, b: number) => a + (b || 0), 0) * 10) / 10;
 
-    // Temperature: today's min
+    // Temperature
     const temps = data.daily?.temperature_2m_min || [];
     const tempC = temps.length > 0 ? Math.round(temps[temps.length - 1]) : 0;
     const maxTemps = data.daily?.temperature_2m_max || [];
     const maxTempC = maxTemps.length > 0 ? Math.round(maxTemps[maxTemps.length - 1]) : 0;
 
-    // Estimate freeze level from temperature gradient (rough: +6.5°C per 1000m)
     const freezeLevel = maxTempC <= 0 ? 0 : Math.round(altitude + (maxTempC / 6.5) * 1000);
 
-    // Recent storm: >5cm in last 48h
     const recentStorm = freshSnow48h >= 5;
     const stormDaysAgo = recentStorm ? (dailySnowfall[0] > dailySnowfall[1] ? 0 : 1) : undefined;
 
-    // Lift status inference from conditions
+    // Lift status from real snow depth
     let liftStatus: "full" | "partial" | "closed" = "full";
-    if (currentSnowCm < 10 && freshSnow48h < 2) liftStatus = "closed";
-    else if (currentSnowCm < 30 || maxTempC > 10) liftStatus = "partial";
+    if (snowDepthBase < 10 && snowDepthPeak < 20) liftStatus = "closed";
+    else if (snowDepthBase < 30 || maxTempC > 10) liftStatus = "partial";
 
     return {
-      snowDepthBase: currentSnowCm,
-      snowDepthPeak: Math.round(currentSnowCm * 1.4), // estimate peak ~40% more than base
+      snowDepthBase,
+      snowDepthPeak,
       freshSnow48h,
       tempC,
       freezeLevel,
@@ -107,10 +131,11 @@ async function fetchWinterConditions(lat: number, lng: number, altitude: number)
       stormDaysAgo,
       liftStatus,
       altitude,
-      dataConfidence: "high",
+      snowSource,
+      dataConfidence: snowSource === "snow-forecast.com" ? "high" : "medium",
     };
   } catch (e) {
-    console.error(`Open-Meteo winter fetch failed for ${lat},${lng}:`, e);
+    console.error(`Winter fetch failed for ${lat},${lng}:`, e);
     return null;
   }
 }
@@ -255,11 +280,11 @@ serve(async (req) => {
       return true;
     });
 
-    console.log(`Starting Open-Meteo sync for ${entries.length} destinations${modeFilter ? ` (${modeFilter} only)` : ""}`);
+    console.log(`Starting sync for ${entries.length} destinations${modeFilter ? ` (${modeFilter} only)` : ""} — snow depths from snow-forecast.com, weather from Open-Meteo`);
 
     // Phase 1: Fetch all weather data in parallel (Open-Meteo is free, no rate limits)
     const conditionsMap: Record<string, any> = {};
-    const PARALLEL_BATCH = 5;
+    const PARALLEL_BATCH = 3; // Keep small — snow-forecast.com is scraped per resort
 
     for (let i = 0; i < entries.length; i += PARALLEL_BATCH) {
       const batch = entries.slice(i, i + PARALLEL_BATCH);
@@ -267,7 +292,7 @@ serve(async (req) => {
         const mode = reg.seasons[0];
         let conditions: any = null;
         if (mode === "winter") {
-          conditions = await fetchWinterConditions(reg.lat, reg.lng, reg.altitude || 1500);
+          conditions = await fetchWinterConditions(reg.lat, reg.lng, reg.altitude || 1500, reg.snowForecastSlug);
         } else {
           conditions = await fetchSummerConditions(reg.lat, reg.lng);
         }
@@ -278,11 +303,11 @@ serve(async (req) => {
       for (const r of results) {
         if (r.conditions) conditionsMap[r.id] = r.conditions;
       }
-      // Avoid Open-Meteo rate limiting
-      if (i + PARALLEL_BATCH < entries.length) await new Promise(r => setTimeout(r, 1500));
+      // snow-forecast.com is polite — 3 per batch with 2s delay
+      if (i + PARALLEL_BATCH < entries.length) await new Promise(r => setTimeout(r, 2000));
     }
 
-    console.log(`Open-Meteo fetched conditions for ${Object.keys(conditionsMap).length}/${entries.length} destinations`);
+    console.log(`Fetched conditions for ${Object.keys(conditionsMap).length}/${entries.length} destinations`);
 
     // Phase 2: Generate sentiment in batches using LLM + real weather data
     const sentimentMap: Record<string, any> = {};
@@ -316,7 +341,9 @@ serve(async (req) => {
         conditions: { ...conditions, altitude: reg.altitude || 0 },
         costs: reg.defaultCosts,
         sentiment,
-        condition_sources: ["open-meteo.com"],
+        condition_sources: conditions.snowSource === "snow-forecast.com" 
+          ? ["snow-forecast.com", "open-meteo.com"] 
+          : ["open-meteo.com"],
         pricing_sources: ["registry-defaults"],
         data_confidence: conditions.dataConfidence || "low",
         synced_at: new Date().toISOString(),
