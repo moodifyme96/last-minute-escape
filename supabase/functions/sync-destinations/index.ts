@@ -16,6 +16,7 @@ interface RegistryEntry {
   slopeKm?: number;
   transferMinutes: number[];
   safeMonths?: number[];
+  snowForecastSlug?: string;
   defaultCosts: {
     accommodationPerNight: number; activityCostPerDay: number;
     clubMedPerNight: number; clubMedActivityIncluded: boolean;
