@@ -341,7 +341,9 @@ serve(async (req) => {
         conditions: { ...conditions, altitude: reg.altitude || 0 },
         costs: reg.defaultCosts,
         sentiment,
-        condition_sources: ["open-meteo.com"],
+        condition_sources: conditions.snowSource === "snow-forecast.com" 
+          ? ["snow-forecast.com", "open-meteo.com"] 
+          : ["open-meteo.com"],
         pricing_sources: ["registry-defaults"],
         data_confidence: conditions.dataConfidence || "low",
         synced_at: new Date().toISOString(),
