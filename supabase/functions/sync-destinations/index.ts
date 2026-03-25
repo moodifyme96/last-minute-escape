@@ -303,11 +303,11 @@ serve(async (req) => {
       for (const r of results) {
         if (r.conditions) conditionsMap[r.id] = r.conditions;
       }
-      // Avoid Open-Meteo rate limiting
-      if (i + PARALLEL_BATCH < entries.length) await new Promise(r => setTimeout(r, 1500));
+      // snow-forecast.com is polite — 3 per batch with 2s delay
+      if (i + PARALLEL_BATCH < entries.length) await new Promise(r => setTimeout(r, 2000));
     }
 
-    console.log(`Open-Meteo fetched conditions for ${Object.keys(conditionsMap).length}/${entries.length} destinations`);
+    console.log(`Fetched conditions for ${Object.keys(conditionsMap).length}/${entries.length} destinations`);
 
     // Phase 2: Generate sentiment in batches using LLM + real weather data
     const sentimentMap: Record<string, any> = {};
