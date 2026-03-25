@@ -59,48 +59,71 @@ const REGISTRY: Record<string, RegistryEntry> = {
   s15: { name: "Split", country: "HR", region: "Mediterranean", seasons: ["summer"], hubs: ["SPU", "ZAG"], lat: 43.508, lng: 16.440, transferMinutes: [20, 240], safeMonths: [5,6,7,8,9,10], defaultCosts: { accommodationPerNight: 60, activityCostPerDay: 30, clubMedPerNight: 210, clubMedActivityIncluded: true, carRentalPerDay: 25 } },
 };
 
-// ─── Open-Meteo: Winter conditions ───
-async function fetchWinterConditions(lat: number, lng: number, altitude: number): Promise<any> {
+// ─── Snow-Forecast.com: Real resort-reported snow depths ───
+async function fetchSnowDepths(slug: string): Promise<{ upper: number; lower: number } | null> {
   try {
-    // Fetch snow depth, snowfall, temperature at the resort's elevation
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=snowfall_sum,temperature_2m_min,temperature_2m_max&hourly=snow_depth&past_days=2&forecast_days=1&timezone=auto&elevation=${altitude}`;
+    const res = await fetch(`https://www.snow-forecast.com/resorts/${slug}`, {
+      headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
+    });
+    if (!res.ok) { console.error(`snow-forecast.com ${slug}: HTTP ${res.status}`); return null; }
+    const html = await res.text();
+    const upperMatch = html.match(/Upper snow depth:[\s\S]*?<span class="snow">(\d+)<\/span>/i);
+    const lowerMatch = html.match(/Lower snow depth:[\s\S]*?<span class="snow">(\d+)<\/span>/i);
+    return {
+      upper: upperMatch ? parseInt(upperMatch[1]) : 0,
+      lower: lowerMatch ? parseInt(lowerMatch[1]) : 0,
+    };
+  } catch (e) {
+    console.error(`snow-forecast.com fetch failed for ${slug}:`, e);
+    return null;
+  }
+}
+
+// ─── Open-Meteo: Winter weather (temp, snowfall, wind — NOT snow depth) ───
+async function fetchWinterConditions(lat: number, lng: number, altitude: number, snowForecastSlug?: string): Promise<any> {
+  try {
+    // Fetch real snow depths from snow-forecast.com (resort-reported)
+    let snowDepthBase = 0;
+    let snowDepthPeak = 0;
+    let snowSource = "unavailable";
+    if (snowForecastSlug) {
+      const depths = await fetchSnowDepths(snowForecastSlug);
+      if (depths) {
+        snowDepthBase = depths.lower;
+        snowDepthPeak = depths.upper;
+        snowSource = "snow-forecast.com";
+      }
+    }
+
+    // Fetch weather data from Open-Meteo (temp, fresh snowfall, wind)
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=snowfall_sum,temperature_2m_min,temperature_2m_max&past_days=2&forecast_days=1&timezone=auto&elevation=${altitude}`;
     const res = await fetch(url);
     if (!res.ok) { console.error(`Open-Meteo winter error ${res.status} for ${lat},${lng}`); return null; }
     const data = await res.json();
 
-    // Snow depth: latest hourly reading
-    // Open-Meteo returns modeled snow depth which overestimates vs resort-reported values
-    // Apply calibration factor ~0.45 based on cross-referencing with actual resort reports
-    const SNOW_DEPTH_CALIBRATION = 0.45;
-    const snowDepths = (data.hourly?.snow_depth || []).filter((v: any) => v !== null && v !== undefined);
-    const rawSnowCm = snowDepths.length > 0 ? snowDepths[snowDepths.length - 1] * 100 : 0; // API returns meters
-    const currentSnowCm = Math.round(rawSnowCm * SNOW_DEPTH_CALIBRATION);
-
-    // Snowfall in last 48h: sum of daily snowfall for past 2 days
+    // Snowfall in last 48h
     const dailySnowfall = data.daily?.snowfall_sum || [];
-    const freshSnow48h = Math.round(dailySnowfall.slice(0, 2).reduce((a: number, b: number) => a + (b || 0), 0) * 10) / 10; // cm
+    const freshSnow48h = Math.round(dailySnowfall.slice(0, 2).reduce((a: number, b: number) => a + (b || 0), 0) * 10) / 10;
 
-    // Temperature: today's min
+    // Temperature
     const temps = data.daily?.temperature_2m_min || [];
     const tempC = temps.length > 0 ? Math.round(temps[temps.length - 1]) : 0;
     const maxTemps = data.daily?.temperature_2m_max || [];
     const maxTempC = maxTemps.length > 0 ? Math.round(maxTemps[maxTemps.length - 1]) : 0;
 
-    // Estimate freeze level from temperature gradient (rough: +6.5°C per 1000m)
     const freezeLevel = maxTempC <= 0 ? 0 : Math.round(altitude + (maxTempC / 6.5) * 1000);
 
-    // Recent storm: >5cm in last 48h
     const recentStorm = freshSnow48h >= 5;
     const stormDaysAgo = recentStorm ? (dailySnowfall[0] > dailySnowfall[1] ? 0 : 1) : undefined;
 
-    // Lift status inference from conditions
+    // Lift status from real snow depth
     let liftStatus: "full" | "partial" | "closed" = "full";
-    if (currentSnowCm < 10 && freshSnow48h < 2) liftStatus = "closed";
-    else if (currentSnowCm < 30 || maxTempC > 10) liftStatus = "partial";
+    if (snowDepthBase < 10 && snowDepthPeak < 20) liftStatus = "closed";
+    else if (snowDepthBase < 30 || maxTempC > 10) liftStatus = "partial";
 
     return {
-      snowDepthBase: currentSnowCm,
-      snowDepthPeak: Math.round(currentSnowCm * 1.4), // estimate peak ~40% more than base
+      snowDepthBase,
+      snowDepthPeak,
       freshSnow48h,
       tempC,
       freezeLevel,
@@ -108,10 +131,11 @@ async function fetchWinterConditions(lat: number, lng: number, altitude: number)
       stormDaysAgo,
       liftStatus,
       altitude,
-      dataConfidence: "high",
+      snowSource,
+      dataConfidence: snowSource === "snow-forecast.com" ? "high" : "medium",
     };
   } catch (e) {
-    console.error(`Open-Meteo winter fetch failed for ${lat},${lng}:`, e);
+    console.error(`Winter fetch failed for ${lat},${lng}:`, e);
     return null;
   }
 }
