@@ -280,7 +280,7 @@ serve(async (req) => {
       return true;
     });
 
-    console.log(`Starting Open-Meteo sync for ${entries.length} destinations${modeFilter ? ` (${modeFilter} only)` : ""}`);
+    console.log(`Starting sync for ${entries.length} destinations${modeFilter ? ` (${modeFilter} only)` : ""} — snow depths from snow-forecast.com, weather from Open-Meteo`);
 
     // Phase 1: Fetch all weather data in parallel (Open-Meteo is free, no rate limits)
     const conditionsMap: Record<string, any> = {};
