@@ -157,7 +157,7 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
             {/* Data source pills */}
             {!isLoading && isLive && !isError && (
               <div className="hidden md:flex items-center gap-1">
-                {['flights', 'weather', 'sentiment'].map(src => (
+                {['weather', 'sentiment'].map(src => (
                   <span key={src} className={`text-[8px] px-1 py-0.5 rounded-sm ${
                     isLive[src as keyof typeof isLive] ? 'bg-terminal-green/10 text-terminal-green' : 'bg-muted text-muted-foreground'
                   }`}>
