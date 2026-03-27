@@ -5,7 +5,6 @@ import { TravelMode, Destination } from '@/data/types';
 import { DestinationFilters } from '@/components/FilterScreen';
 
 export interface LiveFlags {
-  flights: boolean;
   weather: boolean;
   sentiment: boolean;
 }
@@ -94,7 +93,6 @@ export function useDestinations(mode: TravelMode, days: number, departureDate?: 
       offsetRef.current += result.data.length;
       if (result.live) {
         setLiveFlags(prev => prev ? {
-          flights: prev.flights || result.live.flights,
           weather: prev.weather || result.live.weather,
           sentiment: prev.sentiment || result.live.sentiment,
         } : result.live);

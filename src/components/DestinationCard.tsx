@@ -9,21 +9,19 @@ import CostBreakdown from './card/CostBreakdown';
 interface DestinationCardProps {
   destination: Destination & { _liveFlights?: boolean; _liveWeather?: boolean; _liveSentiment?: boolean; effectiveDays?: number };
   days: number;
-  addLuggage: boolean;
   showPremium: boolean;
+  departureDate?: string;
+  returnDate?: string;
 }
 
-const DestinationCard = ({ destination: dest, days, addLuggage, showPremium }: DestinationCardProps) => {
+const DestinationCard = ({ destination: dest, days, showPremium, departureDate, returnDate }: DestinationCardProps) => {
   const isWinter = dest.mode === 'winter';
   const activityDays = dest.effectiveDays ?? days;
-  const diyTotal = calculateDIYTotal(dest, activityDays, addLuggage);
-  const clubTotal = calculateClubMedTotal(dest, activityDays, addLuggage);
+  const diyTotal = calculateDIYTotal(dest, activityDays);
+  const clubTotal = calculateClubMedTotal(dest, activityDays);
   const f = dest.flights;
-  const hasLiveData = dest._liveFlights || dest._liveWeather || dest._liveSentiment;
+  const hasLiveData = dest._liveWeather || dest._liveSentiment;
   const daysLost = days - activityDays;
-
-  // Check if flight data is missing (fallback)
-  const flightsMissing = f.outbound.airline === '—';
 
   return (
     <div className={`border rounded-sm p-0 overflow-hidden ${isWinter ? 'border-winter bg-winter glow-winter' : 'border-summer bg-summer glow-summer'}`}>
@@ -38,7 +36,6 @@ const DestinationCard = ({ destination: dest, days, addLuggage, showPremium }: D
         </div>
         <div className="flex items-center gap-2">
           <span className="text-[9px] text-muted-foreground">{dest.region}</span>
-          {/* Per-card live indicator */}
           {hasLiveData !== undefined && (
             <span className={`text-[8px] ${hasLiveData ? 'text-terminal-green' : 'text-muted-foreground'}`}>
               {hasLiveData ? '●' : '○'}
@@ -63,35 +60,19 @@ const DestinationCard = ({ destination: dest, days, addLuggage, showPremium }: D
         <SentimentBox sentiment={dest.sentiment} />
       </div>
 
-      {/* Zone 2: Flights */}
-      {flightsMissing ? (
-        <div className="px-3 py-2 border-b border-border">
-          <div className="text-[10px] text-muted-foreground mb-1.5 uppercase tracking-widest">▸ FLIGHTS (TLV)</div>
-          <div className="flex items-center gap-2 p-2 bg-muted/30 rounded-sm border border-border">
-            <WifiOff className="w-3 h-3 text-terminal-amber" />
-            <span className="text-[10px] text-muted-foreground">Flight data unavailable — API limit reached or no routes found</span>
-          </div>
-          <div className="mt-1.5 text-[9px] text-muted-foreground">Hub: TLV→{f.hub}</div>
-        </div>
-      ) : (
-        <FlightZone flights={f} addLuggage={addLuggage} />
-      )}
+      {/* Zone 2: Flights — Google Flights link */}
+      <FlightZone flights={f} departureDate={departureDate} returnDate={returnDate} />
 
       {/* Zone 3: Totals */}
       <div className="px-3 py-2">
         <div className="text-[10px] text-muted-foreground mb-1.5 uppercase tracking-widest flex items-center gap-2">
-          <span>▸ {activityDays}D ACTIVITY / {days}D TRIP</span>
+          <span>▸ {activityDays}D ACTIVITY / {days}D TRIP (EXCL. FLIGHTS)</span>
           {daysLost > 0 && (
             <span className="text-[8px] text-terminal-amber">({daysLost > 1 ? `${daysLost} days` : '1 day'} travel)</span>
           )}
         </div>
 
-        {flightsMissing ? (
-          <div className="flex items-center justify-between p-1.5 rounded-sm bg-muted/30 border border-border">
-            <span className="text-[10px] text-muted-foreground">COST ESTIMATE</span>
-            <span className="text-[10px] text-terminal-amber">AWAITING FLIGHT DATA</span>
-          </div>
-        ) : showPremium ? (
+        {showPremium ? (
           clubTotal > 0 ? (
             <div className={`flex items-center justify-between p-2 rounded-sm border ${isWinter ? 'border-terminal-cyan bg-terminal-cyan/5' : 'border-terminal-amber bg-terminal-amber/5'}`}>
               <span className="text-[11px] font-semibold text-foreground flex items-center gap-1.5">
@@ -111,11 +92,11 @@ const DestinationCard = ({ destination: dest, days, addLuggage, showPremium }: D
           )
         ) : (
           <>
-            <CostBreakdown dest={dest} days={activityDays} addLuggage={addLuggage} isWinter={isWinter} />
+            <CostBreakdown dest={dest} days={activityDays} isWinter={isWinter} />
 
             <div className={`flex items-center justify-between p-1.5 rounded-sm border mb-1.5 ${isWinter ? 'border-winter' : 'border-summer'}`}>
               <span className="text-[10px] font-semibold text-foreground flex items-center gap-1">
-                <DollarSign className="w-3 h-3" /> DIY TOTAL
+                <DollarSign className="w-3 h-3" /> LOCAL COSTS
               </span>
               <span className={`text-sm font-bold ${isWinter ? 'text-terminal-cyan' : 'text-terminal-amber'}`}>
                 €{diyTotal.toLocaleString()}

@@ -11,7 +11,6 @@ const Index = () => {
   const [mode, setMode] = useState<TravelMode | null>(null);
   const [filters, setFilters] = useState<DestinationFilters | null>(null);
   const [days, setDays] = useState(7);
-  const [addLuggage, setAddLuggage] = useState(false);
 
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -33,8 +32,6 @@ const Index = () => {
         onSelectMode={handleSelectMode}
         days={days}
         onDaysChange={setDays}
-        addLuggage={addLuggage}
-        onToggleLuggage={() => setAddLuggage(v => !v)}
         departureDate={departureDate}
         onDepartureDateChange={setDepartureDate}
       />
@@ -56,8 +53,6 @@ const Index = () => {
       mode={mode}
       days={days}
       onDaysChange={setDays}
-      addLuggage={addLuggage}
-      onToggleLuggage={() => setAddLuggage(v => !v)}
       onBack={() => setStep('filters')}
       departureDate={departureDate}
       onDepartureDateChange={setDepartureDate}

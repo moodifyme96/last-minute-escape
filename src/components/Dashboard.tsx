@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { TravelMode, WinterConditions, SummerConditions, calculateDIYTotal } from '@/data/destinations';
 import { DestinationFilters } from '@/components/FilterScreen';
 import DestinationCard from './DestinationCard';
-import { ArrowLeft, Luggage, Clock, Crown, ArrowUpDown, Wifi, WifiOff, Mountain, CalendarIcon, Plus, Loader2 } from 'lucide-react';
+import { ArrowLeft, Clock, Crown, ArrowUpDown, Wifi, WifiOff, Mountain, CalendarIcon, Plus, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useDestinations } from '@/hooks/useDestinations';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -17,15 +17,13 @@ interface DashboardProps {
   mode: TravelMode;
   days: number;
   onDaysChange: (days: number) => void;
-  addLuggage: boolean;
-  onToggleLuggage: () => void;
   onBack: () => void;
   departureDate: Date;
   onDepartureDateChange: (date: Date) => void;
   filters: DestinationFilters;
 }
 
-const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBack, departureDate, onDepartureDateChange, filters }: DashboardProps) => {
+const Dashboard = ({ mode, days, onDaysChange, onBack, departureDate, onDepartureDateChange, filters }: DashboardProps) => {
   const isWinter = mode === 'winter';
   const [showPremium, setShowPremium] = useState(false);
   const [sortBy, setSortBy] = useState<string>(isWinter ? 'freshSnow' : 'swellHeight');
@@ -58,7 +56,7 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
     if (!isLoading && isLive && !hasShownLiveToast) {
       setHasShownLiveToast(true);
       const liveSources = [];
-      if (isLive.flights) liveSources.push('Flights');
+      if (isLive.weather) liveSources.push('Weather');
       if (isLive.weather) liveSources.push('Weather');
       if (isLive.sentiment) liveSources.push('Sentiment');
       if (liveSources.length > 0) {
@@ -91,13 +89,13 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
         case 'vibeScore':
           return b.sentiment.vibeScore - a.sentiment.vibeScore;
         case 'diyTotal':
-          return calculateDIYTotal(a, days, addLuggage) - calculateDIYTotal(b, days, addLuggage);
+          return calculateDIYTotal(a, days) - calculateDIYTotal(b, days);
         default:
           return 0;
       }
     });
     return arr;
-  }, [filtered, sortBy, days, addLuggage]);
+  }, [filtered, sortBy, days]);
 
   const now = new Date();
   const deadline = new Date(now.getTime() + 96 * 60 * 60 * 1000);
@@ -157,7 +155,7 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
             {/* Data source pills */}
             {!isLoading && isLive && !isError && (
               <div className="hidden md:flex items-center gap-1">
-                {['flights', 'weather', 'sentiment'].map(src => (
+                {['weather', 'sentiment'].map(src => (
                   <span key={src} className={`text-[8px] px-1 py-0.5 rounded-sm ${
                     isLive[src as keyof typeof isLive] ? 'bg-terminal-green/10 text-terminal-green' : 'bg-muted text-muted-foreground'
                   }`}>
@@ -228,18 +226,7 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
             </select>
           </div>
 
-          {/* Luggage toggle */}
-          <button
-            onClick={onToggleLuggage}
-            className={`flex items-center gap-1.5 px-2 py-1 rounded-sm border text-[10px] transition-all cursor-pointer ${
-              addLuggage
-                ? 'border-foreground text-foreground bg-muted/50'
-                : 'border-border text-muted-foreground'
-            }`}
-          >
-            <Luggage className="w-3 h-3" />
-            23KG {addLuggage ? '✓' : '✗'}
-          </button>
+
 
           {/* Premium toggle */}
           <button
@@ -323,7 +310,6 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
                     <DestinationCard
                       destination={dest}
                       days={days}
-                      addLuggage={addLuggage}
                       showPremium={showPremium}
                     />
                   </motion.div>
@@ -369,13 +355,12 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
         {/* Footer */}
         <div className="text-center text-[9px] text-muted-foreground mt-6 pb-4 space-y-1">
           <div>
-            LIVE DATA · PRICES IN EUR ·{' '}
+            LIVE DATA · PRICES IN EUR (EXCL. FLIGHTS) ·{' '}
             {isLive && (
               <>
-                {isLive.flights && 'AMADEUS '}
-                {isLive.weather && '· STORMGLASS '}
+                {isLive.weather && 'SNOW-FORECAST · OPEN-METEO '}
                 {isLive.sentiment && '· AI SENTIMENT '}
-                ·{' '}
+                · FLIGHTS VIA GOOGLE FLIGHTS ·{' '}
               </>
             )}
             THE 96-HOUR PIVOT v1.0
