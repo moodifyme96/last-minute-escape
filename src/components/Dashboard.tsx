@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { TravelMode, WinterConditions, SummerConditions, calculateDIYTotal } from '@/data/destinations';
 import { DestinationFilters } from '@/components/FilterScreen';
 import DestinationCard from './DestinationCard';
-import { ArrowLeft, Luggage, Clock, Crown, ArrowUpDown, Wifi, WifiOff, Mountain, CalendarIcon, Plus, Loader2 } from 'lucide-react';
+import { ArrowLeft, Clock, Crown, ArrowUpDown, Wifi, WifiOff, Mountain, CalendarIcon, Plus, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useDestinations } from '@/hooks/useDestinations';
 import { Skeleton } from '@/components/ui/skeleton';

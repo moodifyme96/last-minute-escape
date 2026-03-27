@@ -1,5 +1,5 @@
 import { TravelMode } from '@/data/destinations';
-import { Snowflake, Sun, Luggage, Clock, Zap, CalendarIcon } from 'lucide-react';
+import { Snowflake, Sun, Clock, Zap, CalendarIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { format, addDays, startOfDay } from 'date-fns';
 import { cn } from '@/lib/utils';
