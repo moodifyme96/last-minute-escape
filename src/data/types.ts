@@ -1,21 +1,11 @@
 export type TravelMode = 'winter' | 'summer';
 
 // ─── Flight Schema ───
-export interface FlightLeg {
-  airline: string;
-  departure: string;       // HH:MM
-  arrival: string;         // HH:MM
-  baseFare: number;        // EUR
-  baggageIncluded: boolean; // true = full-service carrier
-}
-
 export interface Flights {
   origin: 'TLV';
   hub: string;             // nearest airport code (GVA, MUC, TRN…)
-  outbound: FlightLeg;
-  returnLeg: FlightLeg;
-  baggageFee: number;      // per-direction 23kg fee (0 if included)
   airportTransfer: number; // one-way transfer cost
+  googleFlightsUrl: string; // deep link to Google Flights for this route
 }
 
 // ─── Resort Conditions Schema ───
@@ -80,26 +70,22 @@ export interface Destination {
   costs: Costs;
 }
 
-// ─── Computed helpers ───
-export const calculateDIYTotal = (dest: Destination, days: number, addLuggage: boolean): number => {
+// ─── Computed helpers (excludes flights — user checks Google Flights separately) ───
+export const calculateDIYTotal = (dest: Destination, days: number): number => {
   const f = dest.flights;
   const c = dest.costs;
-  const flights = f.outbound.baseFare + f.returnLeg.baseFare;
-  const baggage = addLuggage ? f.baggageFee * 2 : 0;
   const transfers = f.airportTransfer * 2;
   const accommodation = c.accommodationPerNight * (days - 1);
   const activity = c.activityCostPerDay * days;
-  return flights + baggage + transfers + accommodation + activity;
+  return transfers + accommodation + activity;
 };
 
-export const calculateClubMedTotal = (dest: Destination, days: number, addLuggage: boolean): number => {
+export const calculateClubMedTotal = (dest: Destination, days: number): number => {
   if (dest.costs.clubMedPerNight === 0) return 0;
   const f = dest.flights;
-  const flights = f.outbound.baseFare + f.returnLeg.baseFare;
-  const baggage = addLuggage ? f.baggageFee * 2 : 0;
   const transfers = f.airportTransfer * 2;
   const clubMed = dest.costs.clubMedPerNight * (days - 1);
-  return flights + baggage + transfers + clubMed;
+  return transfers + clubMed;
 };
 
 // ─── Filtering helpers ───
