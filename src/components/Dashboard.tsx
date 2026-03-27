@@ -226,18 +226,7 @@ const Dashboard = ({ mode, days, onDaysChange, onBack, departureDate, onDepartur
             </select>
           </div>
 
-          {/* Luggage toggle */}
-          <button
-            onClick={onToggleLuggage}
-            className={`flex items-center gap-1.5 px-2 py-1 rounded-sm border text-[10px] transition-all cursor-pointer ${
-              addLuggage
-                ? 'border-foreground text-foreground bg-muted/50'
-                : 'border-border text-muted-foreground'
-            }`}
-          >
-            <Luggage className="w-3 h-3" />
-            23KG {addLuggage ? '✓' : '✗'}
-          </button>
+
 
           {/* Premium toggle */}
           <button
