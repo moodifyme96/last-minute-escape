@@ -11,13 +11,11 @@ interface LandingScreenProps {
   onSelectMode: (mode: TravelMode) => void;
   days: number;
   onDaysChange: (days: number) => void;
-  addLuggage: boolean;
-  onToggleLuggage: () => void;
   departureDate: Date;
   onDepartureDateChange: (date: Date) => void;
 }
 
-const LandingScreen = ({ onSelectMode, days, onDaysChange, addLuggage, onToggleLuggage, departureDate, onDepartureDateChange }: LandingScreenProps) => {
+const LandingScreen = ({ onSelectMode, days, onDaysChange, departureDate, onDepartureDateChange }: LandingScreenProps) => {
   const now = new Date();
   const minDate = startOfDay(addDays(now, 0)); // today
   const maxDate = startOfDay(addDays(now, 4));  // 4 days out
@@ -154,21 +152,6 @@ const LandingScreen = ({ onSelectMode, days, onDaysChange, addLuggage, onToggleL
           </div>
         </div>
 
-        {/* Luggage Toggle */}
-        <button
-          onClick={onToggleLuggage}
-          className={`w-full border rounded-sm p-3 flex items-center justify-between transition-all cursor-pointer ${
-            addLuggage ? 'border-foreground bg-muted/50' : 'border-border bg-card'
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            <Luggage className={`w-4 h-4 ${addLuggage ? 'text-foreground' : 'text-muted-foreground'}`} />
-            <span className="text-xs">ADD 23KG LUGGAGE (PER FLIGHT)</span>
-          </div>
-          <div className={`w-8 h-4 rounded-full flex items-center transition-all ${addLuggage ? 'bg-primary justify-end' : 'bg-muted justify-start'}`}>
-            <div className={`w-3 h-3 rounded-full mx-0.5 ${addLuggage ? 'bg-primary-foreground' : 'bg-muted-foreground'}`} />
-          </div>
-        </button>
       </motion.div>
 
       {/* Feature badges */}
