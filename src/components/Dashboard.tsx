@@ -17,15 +17,13 @@ interface DashboardProps {
   mode: TravelMode;
   days: number;
   onDaysChange: (days: number) => void;
-  addLuggage: boolean;
-  onToggleLuggage: () => void;
   onBack: () => void;
   departureDate: Date;
   onDepartureDateChange: (date: Date) => void;
   filters: DestinationFilters;
 }
 
-const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBack, departureDate, onDepartureDateChange, filters }: DashboardProps) => {
+const Dashboard = ({ mode, days, onDaysChange, onBack, departureDate, onDepartureDateChange, filters }: DashboardProps) => {
   const isWinter = mode === 'winter';
   const [showPremium, setShowPremium] = useState(false);
   const [sortBy, setSortBy] = useState<string>(isWinter ? 'freshSnow' : 'swellHeight');
@@ -97,7 +95,7 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
       }
     });
     return arr;
-  }, [filtered, sortBy, days, addLuggage]);
+  }, [filtered, sortBy, days]);
 
   const now = new Date();
   const deadline = new Date(now.getTime() + 96 * 60 * 60 * 1000);
