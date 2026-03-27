@@ -323,7 +323,6 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
                     <DestinationCard
                       destination={dest}
                       days={days}
-                      addLuggage={addLuggage}
                       showPremium={showPremium}
                     />
                   </motion.div>

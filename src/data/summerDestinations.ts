@@ -3,12 +3,7 @@ import { Destination } from './types';
 export const summerDestinations: Destination[] = [
   {
     id: 's1', name: 'Peniche', country: 'PT', region: 'Atlantic Coast', mode: 'summer',
-    flights: {
-      origin: 'TLV', hub: 'LIS',
-      outbound: { airline: 'TAP', departure: '06:00', arrival: '10:30', baseFare: 165, baggageIncluded: true },
-      returnLeg: { airline: 'TAP', departure: '19:00', arrival: '01:30', baseFare: 180, baggageIncluded: true },
-      baggageFee: 0, airportTransfer: 45,
-    },
+    flights: { origin: 'TLV', hub: 'LIS', airportTransfer: 45, googleFlightsUrl: '' },
     conditions: { waterTempC: 18, swellHeightM: 1.8, swellPeriodS: 12, windKnots: 8, uvIndex: 8, sunnyDays: 5, rainyDays: 1, safeSeasonFlag: true },
     sentiment: {
       vibeScore: 88,
@@ -23,12 +18,7 @@ export const summerDestinations: Destination[] = [
   },
   {
     id: 's2', name: 'Tarifa', country: 'ES', region: 'Mediterranean', mode: 'summer',
-    flights: {
-      origin: 'TLV', hub: 'AGP',
-      outbound: { airline: 'Vueling', departure: '07:30', arrival: '12:00', baseFare: 135, baggageIncluded: false },
-      returnLeg: { airline: 'Vueling', departure: '17:30', arrival: '23:00', baseFare: 150, baggageIncluded: false },
-      baggageFee: 40, airportTransfer: 60,
-    },
+    flights: { origin: 'TLV', hub: 'AGP', airportTransfer: 60, googleFlightsUrl: '' },
     conditions: { waterTempC: 20, swellHeightM: 1.2, swellPeriodS: 8, windKnots: 25, uvIndex: 9, sunnyDays: 6, rainyDays: 0, safeSeasonFlag: true },
     sentiment: {
       vibeScore: 82,
@@ -43,12 +33,7 @@ export const summerDestinations: Destination[] = [
   },
   {
     id: 's3', name: 'Dahab', country: 'EG', region: 'Red Sea', mode: 'summer',
-    flights: {
-      origin: 'TLV', hub: 'SSH',
-      outbound: { airline: 'Israir', departure: '08:00', arrival: '09:00', baseFare: 95, baggageIncluded: true },
-      returnLeg: { airline: 'Israir', departure: '10:00', arrival: '11:00', baseFare: 89, baggageIncluded: true },
-      baggageFee: 0, airportTransfer: 30,
-    },
+    flights: { origin: 'TLV', hub: 'SSH', airportTransfer: 30, googleFlightsUrl: '' },
     conditions: { waterTempC: 26, swellHeightM: 0.5, swellPeriodS: 5, windKnots: 20, uvIndex: 11, sunnyDays: 7, rainyDays: 0, safeSeasonFlag: true },
     sentiment: {
       vibeScore: 90,
@@ -63,12 +48,7 @@ export const summerDestinations: Destination[] = [
   },
   {
     id: 's4', name: 'Essaouira', country: 'MA', region: 'Atlantic Coast', mode: 'summer',
-    flights: {
-      origin: 'TLV', hub: 'ESS',
-      outbound: { airline: 'Ryanair', departure: '06:30', arrival: '12:00', baseFare: 110, baggageIncluded: false },
-      returnLeg: { airline: 'Ryanair', departure: '13:00', arrival: '18:30', baseFare: 120, baggageIncluded: false },
-      baggageFee: 35, airportTransfer: 15,
-    },
+    flights: { origin: 'TLV', hub: 'ESS', airportTransfer: 15, googleFlightsUrl: '' },
     conditions: { waterTempC: 19, swellHeightM: 1.5, swellPeriodS: 10, windKnots: 22, uvIndex: 9, sunnyDays: 6, rainyDays: 0, safeSeasonFlag: true },
     sentiment: {
       vibeScore: 85,
@@ -83,12 +63,7 @@ export const summerDestinations: Destination[] = [
   },
   {
     id: 's5', name: 'Biarritz', country: 'FR', region: 'Atlantic Coast', mode: 'summer',
-    flights: {
-      origin: 'TLV', hub: 'BIQ',
-      outbound: { airline: 'Transavia', departure: '07:00', arrival: '11:30', baseFare: 195, baggageIncluded: false },
-      returnLeg: { airline: 'Transavia', departure: '18:00', arrival: '23:30', baseFare: 210, baggageIncluded: false },
-      baggageFee: 45, airportTransfer: 20,
-    },
+    flights: { origin: 'TLV', hub: 'BIQ', airportTransfer: 20, googleFlightsUrl: '' },
     conditions: { waterTempC: 21, swellHeightM: 1.6, swellPeriodS: 11, windKnots: 10, uvIndex: 7, sunnyDays: 5, rainyDays: 1, safeSeasonFlag: true },
     sentiment: {
       vibeScore: 80,
@@ -103,12 +78,7 @@ export const summerDestinations: Destination[] = [
   },
   {
     id: 's6', name: 'Ericeira', country: 'PT', region: 'Atlantic Coast', mode: 'summer',
-    flights: {
-      origin: 'TLV', hub: 'LIS',
-      outbound: { airline: 'EasyJet', departure: '06:15', arrival: '10:45', baseFare: 155, baggageIncluded: false },
-      returnLeg: { airline: 'TAP', departure: '20:00', arrival: '02:30', baseFare: 175, baggageIncluded: true },
-      baggageFee: 45, airportTransfer: 40,
-    },
+    flights: { origin: 'TLV', hub: 'LIS', airportTransfer: 40, googleFlightsUrl: '' },
     conditions: { waterTempC: 17, swellHeightM: 2.0, swellPeriodS: 13, windKnots: 6, uvIndex: 8, sunnyDays: 6, rainyDays: 0, safeSeasonFlag: true },
     sentiment: {
       vibeScore: 91,
@@ -123,12 +93,7 @@ export const summerDestinations: Destination[] = [
   },
   {
     id: 's7', name: 'Fuerteventura', country: 'ES', region: 'Canary Islands', mode: 'summer',
-    flights: {
-      origin: 'TLV', hub: 'FUE',
-      outbound: { airline: 'Wizz Air', departure: '05:30', arrival: '10:00', baseFare: 125, baggageIncluded: false },
-      returnLeg: { airline: 'Wizz Air', departure: '11:00', arrival: '17:30', baseFare: 140, baggageIncluded: false },
-      baggageFee: 35, airportTransfer: 25,
-    },
+    flights: { origin: 'TLV', hub: 'FUE', airportTransfer: 25, googleFlightsUrl: '' },
     conditions: { waterTempC: 22, swellHeightM: 1.4, swellPeriodS: 10, windKnots: 18, uvIndex: 10, sunnyDays: 7, rainyDays: 0, safeSeasonFlag: true },
     sentiment: {
       vibeScore: 84,
@@ -143,12 +108,7 @@ export const summerDestinations: Destination[] = [
   },
   {
     id: 's8', name: 'Zanzibar', country: 'TZ', region: 'Indian Ocean', mode: 'summer',
-    flights: {
-      origin: 'TLV', hub: 'ZNZ',
-      outbound: { airline: 'Turkish', departure: '01:00', arrival: '12:00', baseFare: 385, baggageIncluded: true },
-      returnLeg: { airline: 'Turkish', departure: '14:00', arrival: '23:00', baseFare: 410, baggageIncluded: true },
-      baggageFee: 0, airportTransfer: 20,
-    },
+    flights: { origin: 'TLV', hub: 'ZNZ', airportTransfer: 20, googleFlightsUrl: '' },
     conditions: { waterTempC: 28, swellHeightM: 0.8, swellPeriodS: 7, windKnots: 16, uvIndex: 12, sunnyDays: 6, rainyDays: 1, safeSeasonFlag: true },
     sentiment: {
       vibeScore: 86,
@@ -163,12 +123,7 @@ export const summerDestinations: Destination[] = [
   },
   {
     id: 's9', name: 'Hossegor', country: 'FR', region: 'Atlantic Coast', mode: 'summer',
-    flights: {
-      origin: 'TLV', hub: 'BIQ',
-      outbound: { airline: 'Transavia', departure: '07:00', arrival: '11:30', baseFare: 185, baggageIncluded: false },
-      returnLeg: { airline: 'Transavia', departure: '18:00', arrival: '23:30', baseFare: 200, baggageIncluded: false },
-      baggageFee: 45, airportTransfer: 30,
-    },
+    flights: { origin: 'TLV', hub: 'BIQ', airportTransfer: 30, googleFlightsUrl: '' },
     conditions: { waterTempC: 20, swellHeightM: 2.2, swellPeriodS: 14, windKnots: 5, uvIndex: 7, sunnyDays: 5, rainyDays: 1, safeSeasonFlag: true },
     sentiment: {
       vibeScore: 93,
@@ -183,12 +138,7 @@ export const summerDestinations: Destination[] = [
   },
   {
     id: 's10', name: 'Sagres', country: 'PT', region: 'Atlantic Coast', mode: 'summer',
-    flights: {
-      origin: 'TLV', hub: 'FAO',
-      outbound: { airline: 'Ryanair', departure: '06:45', arrival: '11:00', baseFare: 140, baggageIncluded: false },
-      returnLeg: { airline: 'Ryanair', departure: '12:00', arrival: '17:30', baseFare: 155, baggageIncluded: false },
-      baggageFee: 35, airportTransfer: 50,
-    },
+    flights: { origin: 'TLV', hub: 'FAO', airportTransfer: 50, googleFlightsUrl: '' },
     conditions: { waterTempC: 18, swellHeightM: 1.7, swellPeriodS: 11, windKnots: 12, uvIndex: 9, sunnyDays: 6, rainyDays: 0, safeSeasonFlag: true },
     sentiment: {
       vibeScore: 79,
@@ -203,12 +153,7 @@ export const summerDestinations: Destination[] = [
   },
   {
     id: 's11', name: 'Taghazout', country: 'MA', region: 'Atlantic Coast', mode: 'summer',
-    flights: {
-      origin: 'TLV', hub: 'AGA',
-      outbound: { airline: 'Ryanair', departure: '08:00', arrival: '13:00', baseFare: 105, baggageIncluded: false },
-      returnLeg: { airline: 'Ryanair', departure: '14:00', arrival: '19:30', baseFare: 115, baggageIncluded: false },
-      baggageFee: 35, airportTransfer: 20,
-    },
+    flights: { origin: 'TLV', hub: 'AGA', airportTransfer: 20, googleFlightsUrl: '' },
     conditions: { waterTempC: 20, swellHeightM: 1.3, swellPeriodS: 9, windKnots: 8, uvIndex: 10, sunnyDays: 7, rainyDays: 0, safeSeasonFlag: true },
     sentiment: {
       vibeScore: 83,
@@ -223,12 +168,7 @@ export const summerDestinations: Destination[] = [
   },
   {
     id: 's12', name: 'Crete', country: 'GR', region: 'Mediterranean', mode: 'summer',
-    flights: {
-      origin: 'TLV', hub: 'HER',
-      outbound: { airline: 'Aegean', departure: '06:30', arrival: '09:30', baseFare: 155, baggageIncluded: true },
-      returnLeg: { airline: 'Aegean', departure: '10:30', arrival: '13:30', baseFare: 165, baggageIncluded: true },
-      baggageFee: 0, airportTransfer: 30,
-    },
+    flights: { origin: 'TLV', hub: 'HER', airportTransfer: 30, googleFlightsUrl: '' },
     conditions: { waterTempC: 24, swellHeightM: 0.6, swellPeriodS: 6, windKnots: 14, uvIndex: 10, sunnyDays: 7, rainyDays: 0, safeSeasonFlag: true },
     sentiment: {
       vibeScore: 76,
@@ -243,12 +183,7 @@ export const summerDestinations: Destination[] = [
   },
   {
     id: 's13', name: 'Sardinia', country: 'IT', region: 'Mediterranean', mode: 'summer',
-    flights: {
-      origin: 'TLV', hub: 'CAG',
-      outbound: { airline: 'Ryanair', departure: '07:00', arrival: '10:00', baseFare: 145, baggageIncluded: false },
-      returnLeg: { airline: 'Ryanair', departure: '11:00', arrival: '15:30', baseFare: 160, baggageIncluded: false },
-      baggageFee: 35, airportTransfer: 35,
-    },
+    flights: { origin: 'TLV', hub: 'CAG', airportTransfer: 35, googleFlightsUrl: '' },
     conditions: { waterTempC: 23, swellHeightM: 0.9, swellPeriodS: 7, windKnots: 12, uvIndex: 9, sunnyDays: 6, rainyDays: 0, safeSeasonFlag: true },
     sentiment: {
       vibeScore: 74,
@@ -263,12 +198,7 @@ export const summerDestinations: Destination[] = [
   },
   {
     id: 's14', name: 'Lanzarote', country: 'ES', region: 'Canary Islands', mode: 'summer',
-    flights: {
-      origin: 'TLV', hub: 'ACE',
-      outbound: { airline: 'Wizz Air', departure: '05:30', arrival: '10:00', baseFare: 130, baggageIncluded: false },
-      returnLeg: { airline: 'Wizz Air', departure: '11:00', arrival: '17:30', baseFare: 145, baggageIncluded: false },
-      baggageFee: 35, airportTransfer: 20,
-    },
+    flights: { origin: 'TLV', hub: 'ACE', airportTransfer: 20, googleFlightsUrl: '' },
     conditions: { waterTempC: 21, swellHeightM: 1.5, swellPeriodS: 11, windKnots: 15, uvIndex: 10, sunnyDays: 7, rainyDays: 0, safeSeasonFlag: true },
     sentiment: {
       vibeScore: 81,
@@ -283,12 +213,7 @@ export const summerDestinations: Destination[] = [
   },
   {
     id: 's15', name: 'Split', country: 'HR', region: 'Mediterranean', mode: 'summer',
-    flights: {
-      origin: 'TLV', hub: 'SPU',
-      outbound: { airline: 'Wizz Air', departure: '06:00', arrival: '08:30', baseFare: 115, baggageIncluded: false },
-      returnLeg: { airline: 'Wizz Air', departure: '09:30', arrival: '12:00', baseFare: 125, baggageIncluded: false },
-      baggageFee: 30, airportTransfer: 15,
-    },
+    flights: { origin: 'TLV', hub: 'SPU', airportTransfer: 15, googleFlightsUrl: '' },
     conditions: { waterTempC: 24, swellHeightM: 0.3, swellPeriodS: 4, windKnots: 10, uvIndex: 9, sunnyDays: 7, rainyDays: 0, safeSeasonFlag: true },
     sentiment: {
       vibeScore: 77,
