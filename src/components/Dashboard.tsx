@@ -58,7 +58,7 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
     if (!isLoading && isLive && !hasShownLiveToast) {
       setHasShownLiveToast(true);
       const liveSources = [];
-      if (isLive.flights) liveSources.push('Flights');
+      if (isLive.weather) liveSources.push('Weather');
       if (isLive.weather) liveSources.push('Weather');
       if (isLive.sentiment) liveSources.push('Sentiment');
       if (liveSources.length > 0) {
