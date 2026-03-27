@@ -32,8 +32,6 @@ const Index = () => {
         onSelectMode={handleSelectMode}
         days={days}
         onDaysChange={setDays}
-        addLuggage={addLuggage}
-        onToggleLuggage={() => setAddLuggage(v => !v)}
         departureDate={departureDate}
         onDepartureDateChange={setDepartureDate}
       />
