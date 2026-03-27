@@ -91,7 +91,7 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
         case 'vibeScore':
           return b.sentiment.vibeScore - a.sentiment.vibeScore;
         case 'diyTotal':
-          return calculateDIYTotal(a, days, addLuggage) - calculateDIYTotal(b, days, addLuggage);
+          return calculateDIYTotal(a, days) - calculateDIYTotal(b, days);
         default:
           return 0;
       }
@@ -369,13 +369,12 @@ const Dashboard = ({ mode, days, onDaysChange, addLuggage, onToggleLuggage, onBa
         {/* Footer */}
         <div className="text-center text-[9px] text-muted-foreground mt-6 pb-4 space-y-1">
           <div>
-            LIVE DATA · PRICES IN EUR ·{' '}
+            LIVE DATA · PRICES IN EUR (EXCL. FLIGHTS) ·{' '}
             {isLive && (
               <>
-                {isLive.flights && 'AMADEUS '}
-                {isLive.weather && '· STORMGLASS '}
+                {isLive.weather && 'SNOW-FORECAST · OPEN-METEO '}
                 {isLive.sentiment && '· AI SENTIMENT '}
-                ·{' '}
+                · FLIGHTS VIA GOOGLE FLIGHTS ·{' '}
               </>
             )}
             THE 96-HOUR PIVOT v1.0
