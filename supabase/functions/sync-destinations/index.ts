@@ -209,7 +209,46 @@ async function fetchSummerConditions(lat: number, lng: number): Promise<any> {
   }
 }
 
-// ─── LLM Sentiment (general knowledge, no scraping needed) ───
+// ─── Amadeus: Fetch indicative flight prices ───
+async function getAmadeusToken(): Promise<string | null> {
+  const key = Deno.env.get("AMADEUS_API_KEY");
+  const secret = Deno.env.get("AMADEUS_API_SECRET");
+  if (!key || !secret) { console.error("Missing Amadeus credentials"); return null; }
+  try {
+    const res = await fetch("https://test.api.amadeus.com/v1/security/oauth2/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `grant_type=client_credentials&client_id=${key}&client_secret=${secret}`,
+    });
+    if (!res.ok) { console.error("Amadeus auth failed:", res.status); return null; }
+    const data = await res.json();
+    return data.access_token;
+  } catch (e) { console.error("Amadeus auth error:", e); return null; }
+}
+
+async function fetchFlightPrice(
+  token: string, hub: string, depDate: string, retDate: string
+): Promise<number | null> {
+  try {
+    const url = `https://test.api.amadeus.com/v2/shopping/flight-offers?originLocationCode=TLV&destinationLocationCode=${hub}&departureDate=${depDate}&returnDate=${retDate}&adults=1&nonStop=false&max=3&currencyCode=EUR`;
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      console.error(`Amadeus flight search ${hub}: ${res.status}`, body.slice(0, 200));
+      return null;
+    }
+    const data = await res.json();
+    const offers = data.data || [];
+    if (offers.length === 0) return null;
+    // Get cheapest price
+    const prices = offers.map((o: any) => parseFloat(o.price?.total || "0")).filter((p: number) => p > 0);
+    return prices.length > 0 ? Math.round(Math.min(...prices)) : null;
+  } catch (e) { console.error(`Amadeus flight price error for ${hub}:`, e); return null; }
+}
+
+
 async function generateSentiment(
   destinations: { id: string; name: string; mode: string; conditions: any }[],
   aiKey: string
