@@ -245,11 +245,15 @@ serve(async (req) => {
       const transferMin = reg.transferMinutes[0] || 60;
       const transferCost = Math.round(transferMin <= 60 ? 30 : transferMin <= 120 ? 50 : transferMin <= 180 ? 70 : 90);
 
+      // Extract flight price from cached conditions
+      const flightPrice = cached?.conditions?.flightPrice || null;
+
       const flights = {
         origin: "TLV" as const,
         hub: bestHub,
         airportTransfer: transferCost,
         googleFlightsUrl: buildGoogleFlightsUrl(bestHub, depDate, retDate),
+        estimatedPrice: flightPrice,
       };
 
       const safeFlag = mode === "summer" ? isSeasonSafe(reg, "summer") : true;

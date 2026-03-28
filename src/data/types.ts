@@ -6,6 +6,7 @@ export interface Flights {
   hub: string;             // nearest airport code (GVA, MUC, TRN…)
   airportTransfer: number; // one-way transfer cost
   googleFlightsUrl: string; // deep link to Google Flights for this route
+  estimatedPrice?: number | null; // round-trip flight estimate in EUR
 }
 
 // ─── Resort Conditions Schema ───
