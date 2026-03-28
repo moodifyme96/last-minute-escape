@@ -58,9 +58,9 @@ const REGISTRY: Record<string, RegistryEntry> = {
   s15: { name: "Split", country: "HR", region: "Mediterranean", seasons: ["summer"], hubs: ["SPU", "ZAG"], lat: 43.508, lng: 16.440, transferMinutes: [20, 240], safeMonths: [5,6,7,8,9,10], defaultCosts: { accommodationPerNight: 60, activityCostPerDay: 30, clubMedPerNight: 210, clubMedActivityIncluded: true, carRentalPerDay: 25 } },
 };
 
-// ─── Google Flights URL builder ───
+// ─── Google Flights URL builder (uses Google Search — reliably shows flights widget) ───
 function buildGoogleFlightsUrl(hub: string, depDate: string, retDate: string): string {
-  return `https://www.google.com/travel/flights?q=Flights+from+TLV+to+${hub}+on+${depDate}+return+${retDate}`;
+  return `https://www.google.com/search?q=flights+TLV+to+${hub}+${depDate}+to+${retDate}`;
 }
 
 // ─── Season-aware filtering ───

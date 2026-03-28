@@ -30,11 +30,10 @@ const FlightZone = ({ flights: f, departureDate, returnDate }: { flights: Flight
 };
 
 function buildGoogleFlightsUrl(hub: string, depDate?: string, retDate?: string): string {
-  const base = 'https://www.google.com/travel/flights';
   if (depDate && retDate) {
-    return `${base}?q=Flights+from+TLV+to+${hub}+on+${depDate}+return+${retDate}`;
+    return `https://www.google.com/search?q=flights+TLV+to+${hub}+${depDate}+to+${retDate}`;
   }
-  return `${base}?q=Flights+from+TLV+to+${hub}`;
+  return `https://www.google.com/search?q=flights+TLV+to+${hub}`;
 }
 
 export default FlightZone;
