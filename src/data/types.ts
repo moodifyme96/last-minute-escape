@@ -6,6 +6,7 @@ export interface Flights {
   hub: string;             // nearest airport code (GVA, MUC, TRN…)
   airportTransfer: number; // one-way transfer cost
   googleFlightsUrl: string; // deep link to Google Flights for this route
+  estimatedPrice?: number | null; // round-trip flight estimate in EUR
 }
 
 // ─── Resort Conditions Schema ───
@@ -74,18 +75,20 @@ export interface Destination {
 export const calculateDIYTotal = (dest: Destination, days: number): number => {
   const f = dest.flights;
   const c = dest.costs;
+  const flightCost = f.estimatedPrice || 0;
   const transfers = f.airportTransfer * 2;
   const accommodation = c.accommodationPerNight * (days - 1);
   const activity = c.activityCostPerDay * days;
-  return transfers + accommodation + activity;
+  return flightCost + transfers + accommodation + activity;
 };
 
 export const calculateClubMedTotal = (dest: Destination, days: number): number => {
   if (dest.costs.clubMedPerNight === 0) return 0;
   const f = dest.flights;
+  const flightCost = f.estimatedPrice || 0;
   const transfers = f.airportTransfer * 2;
   const clubMed = dest.costs.clubMedPerNight * (days - 1);
-  return transfers + clubMed;
+  return flightCost + transfers + clubMed;
 };
 
 // ─── Filtering helpers ───

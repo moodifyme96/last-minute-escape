@@ -16,25 +16,36 @@ const FlightZone = ({ flights: f, departureDate, returnDate }: { flights: Flight
         <div className="flex items-center gap-2">
           <Plane className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
           <div>
-            <div className="text-[11px] font-semibold text-foreground">Check flights on Google Flights</div>
-            <div className="text-[9px] text-muted-foreground">TLV → {f.hub} · Round trip · Real-time prices</div>
+            {f.estimatedPrice ? (
+              <>
+                <div className="text-[11px] font-semibold text-foreground">
+                  ~€{f.estimatedPrice} round trip
+                </div>
+                <div className="text-[9px] text-muted-foreground">TLV → {f.hub} · Click to verify on Google Flights</div>
+              </>
+            ) : (
+              <>
+                <div className="text-[11px] font-semibold text-foreground">Check flights on Google Flights</div>
+                <div className="text-[9px] text-muted-foreground">TLV → {f.hub} · Round trip · Real-time prices</div>
+              </>
+            )}
           </div>
         </div>
         <ExternalLink className="w-3 h-3 text-muted-foreground group-hover:text-primary transition-colors" />
       </a>
       <div className="mt-1.5 text-[9px] text-muted-foreground">
         Transfer: €{f.airportTransfer}×2
+        {f.estimatedPrice && <span className="ml-2 italic">· Flight price is indicative</span>}
       </div>
     </div>
   );
 };
 
 function buildGoogleFlightsUrl(hub: string, depDate?: string, retDate?: string): string {
-  const base = 'https://www.google.com/travel/flights';
   if (depDate && retDate) {
-    return `${base}?q=Flights+from+TLV+to+${hub}+on+${depDate}+return+${retDate}`;
+    return `https://www.google.com/search?q=flights+TLV+to+${hub}+${depDate}+to+${retDate}`;
   }
-  return `${base}?q=Flights+from+TLV+to+${hub}`;
+  return `https://www.google.com/search?q=flights+TLV+to+${hub}`;
 }
 
 export default FlightZone;

@@ -209,7 +209,46 @@ async function fetchSummerConditions(lat: number, lng: number): Promise<any> {
   }
 }
 
-// ─── LLM Sentiment (general knowledge, no scraping needed) ───
+// ─── Amadeus: Fetch indicative flight prices ───
+async function getAmadeusToken(): Promise<string | null> {
+  const key = Deno.env.get("AMADEUS_API_KEY");
+  const secret = Deno.env.get("AMADEUS_API_SECRET");
+  if (!key || !secret) { console.error("Missing Amadeus credentials"); return null; }
+  try {
+    const res = await fetch("https://test.api.amadeus.com/v1/security/oauth2/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `grant_type=client_credentials&client_id=${key}&client_secret=${secret}`,
+    });
+    if (!res.ok) { console.error("Amadeus auth failed:", res.status); return null; }
+    const data = await res.json();
+    return data.access_token;
+  } catch (e) { console.error("Amadeus auth error:", e); return null; }
+}
+
+async function fetchFlightPrice(
+  token: string, hub: string, depDate: string, retDate: string
+): Promise<number | null> {
+  try {
+    const url = `https://test.api.amadeus.com/v2/shopping/flight-offers?originLocationCode=TLV&destinationLocationCode=${hub}&departureDate=${depDate}&returnDate=${retDate}&adults=1&nonStop=false&max=3&currencyCode=EUR`;
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      console.error(`Amadeus flight search ${hub}: ${res.status}`, body.slice(0, 200));
+      return null;
+    }
+    const data = await res.json();
+    const offers = data.data || [];
+    if (offers.length === 0) return null;
+    // Get cheapest price
+    const prices = offers.map((o: any) => parseFloat(o.price?.total || "0")).filter((p: number) => p > 0);
+    return prices.length > 0 ? Math.round(Math.min(...prices)) : null;
+  } catch (e) { console.error(`Amadeus flight price error for ${hub}:`, e); return null; }
+}
+
+
 async function generateSentiment(
   destinations: { id: string; name: string; mode: string; conditions: any }[],
   aiKey: string
@@ -309,7 +348,48 @@ serve(async (req) => {
 
     console.log(`Fetched conditions for ${Object.keys(conditionsMap).length}/${entries.length} destinations`);
 
-    // Phase 2: Generate sentiment in batches using LLM + real weather data
+    // Phase 2: Fetch flight prices from Amadeus
+    const flightPriceMap: Record<string, number> = {};
+    const amadeusToken = await getAmadeusToken();
+    if (amadeusToken) {
+      // Compute dates for flight search (tomorrow + days)
+      const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+      const retDay = new Date(tomorrow); retDay.setDate(retDay.getDate() + 3);
+      const fmtD = (d: Date) => d.toISOString().split("T")[0];
+      const depStr = fmtD(tomorrow);
+      const retStr = fmtD(retDay);
+
+      // Deduplicate hubs to minimize API calls
+      const hubSet = new Map<string, string[]>(); // hub -> [destIds]
+      for (const [id, reg] of entries) {
+        const hub = reg.hubs[0];
+        if (!hubSet.has(hub)) hubSet.set(hub, []);
+        hubSet.get(hub)!.push(id);
+      }
+
+      const FLIGHT_BATCH = 3;
+      const hubEntries = [...hubSet.entries()];
+      for (let i = 0; i < hubEntries.length; i += FLIGHT_BATCH) {
+        const batch = hubEntries.slice(i, i + FLIGHT_BATCH);
+        const results = await Promise.all(
+          batch.map(async ([hub, ids]) => {
+            const price = await fetchFlightPrice(amadeusToken, hub, depStr, retStr);
+            return { hub, ids, price };
+          })
+        );
+        for (const r of results) {
+          if (r.price) {
+            for (const id of r.ids) flightPriceMap[id] = r.price;
+          }
+        }
+        if (i + FLIGHT_BATCH < hubEntries.length) await new Promise(r => setTimeout(r, 500));
+      }
+      console.log(`Fetched flight prices for ${Object.keys(flightPriceMap).length} destinations via ${hubSet.size} unique hubs`);
+    } else {
+      console.warn("Skipping flight prices — Amadeus auth failed");
+    }
+
+    // Phase 3: Generate sentiment in batches using LLM + real weather data
     const sentimentMap: Record<string, any> = {};
     const SENTIMENT_BATCH = 8;
 
@@ -323,7 +403,7 @@ serve(async (req) => {
       Object.assign(sentimentMap, sentResult);
     }
 
-    // Phase 3: Upsert to database
+    // Phase 4: Upsert to database
     let totalSynced = 0;
     for (const [id, reg] of entries) {
       const conditions = conditionsMap[id] || {};
@@ -332,19 +412,22 @@ serve(async (req) => {
         sources: [], lastUpdated: new Date().toISOString(),
       };
 
+      const costs = { ...reg.defaultCosts };
+      const flightPrice = flightPriceMap[id];
+
       const row = {
         id,
         mode: reg.seasons[0],
         name: reg.name,
         country: reg.country,
         region: reg.region,
-        conditions: { ...conditions, altitude: reg.altitude || 0 },
-        costs: reg.defaultCosts,
+        conditions: { ...conditions, altitude: reg.altitude || 0, flightPrice: flightPrice || null },
+        costs,
         sentiment,
         condition_sources: conditions.snowSource === "snow-forecast.com" 
           ? ["snow-forecast.com", "open-meteo.com"] 
           : ["open-meteo.com"],
-        pricing_sources: ["registry-defaults"],
+        pricing_sources: flightPrice ? ["amadeus", "registry-defaults"] : ["registry-defaults"],
         data_confidence: conditions.dataConfidence || "low",
         synced_at: new Date().toISOString(),
       };
@@ -354,7 +437,7 @@ serve(async (req) => {
         console.error(`Upsert error for ${id}:`, error);
       } else {
         totalSynced++;
-        console.log(`✓ ${id}: ${reg.name} — snow:${conditions.snowDepthBase || '-'}cm fresh:${conditions.freshSnow48h || '-'}cm conf:${row.data_confidence}`);
+        console.log(`✓ ${id}: ${reg.name} — flight:€${flightPrice || '?'} snow:${conditions.snowDepthBase || '-'}cm conf:${row.data_confidence}`);
       }
     }
 
