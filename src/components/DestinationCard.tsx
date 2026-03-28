@@ -66,7 +66,7 @@ const DestinationCard = ({ destination: dest, days, showPremium, departureDate, 
       {/* Zone 3: Totals */}
       <div className="px-3 py-2">
         <div className="text-[10px] text-muted-foreground mb-1.5 uppercase tracking-widest flex items-center gap-2">
-          <span>▸ {activityDays}D ACTIVITY / {days}D TRIP (EXCL. FLIGHTS)</span>
+          <span>▸ {activityDays}D ACTIVITY / {days}D TRIP{f.estimatedPrice ? '' : ' (EXCL. FLIGHTS)'}</span>
           {daysLost > 0 && (
             <span className="text-[8px] text-terminal-amber">({daysLost > 1 ? `${daysLost} days` : '1 day'} travel)</span>
           )}
